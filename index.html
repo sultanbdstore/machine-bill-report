@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Machine Usage Bill Report Maker</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1F3A5F"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{--navy:#1F3A5F;--or:#E8710A;--orl:#FDEBD3;--ord:#9A4A00;--te:#0E8C7F;--tel:#D5F0EC;--ted:#075E55;--red:#C62828;--redl:#FDE8E8;--gr:#F3F5F8;--mid:#5B6B7F;--dk:#222B38;--line:#D5DBE3;--bg:#fff;--card:#fff}
+@media (prefers-color-scheme: dark){:root{--bg:#10151c;--card:#171e28;--gr:#1d2632;--dk:#e6ebf2;--mid:#9fb0c4;--line:#2d3a4b;--orl:#3a2a17;--tel:#143430;--redl:#3a1c1c;--ord:#ffb46a;--ted:#6fe0d0}}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--dk);font-size:14px}
+.top{background:var(--navy);color:#fff;padding:18px 28px}.top h1{margin:0;font-size:26px;letter-spacing:.5px}.top p{margin:4px 0 0;color:#C9D6E8;font-size:13px}
+.wrap{max-width:1280px;margin:0 auto;padding:18px 20px 60px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.panel h2{margin:0 0 10px;font-size:15px;color:var(--navy)}@media (prefers-color-scheme: dark){.panel h2{color:#9cc3ff}}
+.drop{border:2px dashed var(--mid);border-radius:12px;padding:26px;text-align:center;cursor:pointer;background:var(--gr)}
+.drop.over{border-color:var(--or);background:var(--orl)}.drop b{font-size:16px}.drop small{display:block;color:var(--mid);margin-top:6px}
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}.row>div{display:flex;flex-direction:column;gap:4px}
+label{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.4px}
+input[type=month],input[type=number],input[type=date],input[type=text],select{padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--dk);font-size:14px}
+input.in{border:2px solid #0000FF55;background:#FFFFE0;color:#0000FF;font-weight:700}
+@media (prefers-color-scheme: dark){input.in{background:#2a2a14;color:#9db8ff}}
+button{background:var(--navy);color:#fff;border:0;border-radius:6px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer}
+button.alt{background:var(--or)}button.ghost{background:transparent;color:var(--mid);border:1px solid var(--line)}button:hover{filter:brightness(1.1)}
+details{margin-top:12px}summary{cursor:pointer;font-weight:700;color:var(--navy)}@media (prefers-color-scheme: dark){summary{color:#9cc3ff}}
+table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--line);padding:6px 8px;text-align:center;font-size:13px}th{background:var(--navy);color:#fff;font-size:11px;font-weight:700}
+td.l,th.l{text-align:left}.scroll{overflow-x:auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.tabs button{background:var(--gr);color:var(--dk);border:1px solid var(--line)}.tabs button.on{background:var(--navy);color:#fff}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{border-radius:10px;overflow:hidden;border:1px solid var(--line)}.card .lb{color:#fff;font-size:11px;font-weight:700;text-align:center;padding:7px 4px;letter-spacing:.3px}
+.card .vl{font-size:38px;font-weight:700;text-align:center;padding:12px 4px 4px}.card .sb{font-size:11px;font-style:italic;color:var(--mid);text-align:center;padding:0 4px 10px}
+.c-or .lb{background:var(--or)}.c-or{background:var(--orl)}.c-or .vl{color:var(--ord)}
+.c-te .lb{background:var(--te)}.c-te{background:var(--tel)}.c-te .vl{color:var(--ted)}
+.c-na .lb{background:var(--navy)}.c-na{background:var(--gr)}.c-na .vl{color:var(--navy)}@media (prefers-color-scheme: dark){.c-na .vl{color:#9cc3ff}}
+.c-gy .lb{background:#5B6B7F}.c-gy{background:var(--gr)}.c-rd .lb{background:var(--red)}.c-rd{background:var(--redl)}.c-rd .vl{color:var(--red)}
+.c-lo .lb{background:#F29F4B}.c-lo{background:var(--orl)}.c-lo .vl{color:var(--ord)}
+.sec{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:7px 12px;border-radius:6px;margin:14px 0 10px}
+.band-or td{background:var(--or);color:#fff;font-weight:700;text-align:left}.band-te td{background:var(--te);color:#fff;font-weight:700;text-align:left}
+tr.tot td{font-weight:700;border-top:2px solid var(--navy);border-bottom:2px solid var(--navy)}tr.tot-or td{background:#FDDDB5;color:#222}tr.tot-te td{background:#A9E0D8;color:#222}tr.net td{background:var(--navy);color:#fff;font-weight:700}
+.r365{background:var(--red)!important;color:#fff!important;font-weight:700}.r90{background:var(--orl)!important;color:var(--ord)!important;font-weight:700}
+.obs{background:var(--gr);border-bottom:1px solid var(--line);padding:9px 12px}.obs:nth-child(even){background:var(--card)}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:900px){.charts{grid-template-columns:1fr}}
+.chart{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card)}.chart h3{margin:0 0 6px;font-size:13px;text-align:center}
+.legend{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;font-size:11px;color:var(--mid);margin-top:4px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+.bill{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.bill .hd{background:var(--navy);color:#fff;padding:12px 18px}.bill .hd h2{margin:0;font-size:24px;color:#fff}.bill .hd p{margin:3px 0 0;font-size:12px;color:#C9D6E8}
+.kv{display:grid;grid-template-columns:1fr 1fr}.kv>div{padding:0}.kv h4{margin:0;padding:6px 12px;font-size:11px;color:#fff}.kv .rw{display:flex;border-bottom:1px solid var(--line);padding:7px 12px;gap:10px;font-size:13px}.kv .rw span{color:var(--mid);font-weight:700;width:110px;flex:none}
+.warn{background:#FFF6D6;color:#5b4500;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
+.err{background:var(--redl);color:var(--red);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700}
+.hide{display:none}.muted{color:var(--mid);font-size:12px}
+.sig{display:flex;gap:40px;margin:46px 18px 18px}.sig div{flex:1;border-top:1px solid var(--dk);text-align:center;font-size:11px;font-weight:700;color:var(--mid);padding-top:4px}
+@media print{body{background:#fff;color:#000}.top,.panel.noprint,.tabs,.noprint,.top *{display:none!important}.wrap{max-width:none;padding:0}.tabpane{display:none!important}.tabpane.printing{display:block!important}
+ .card,.bill,.chart{break-inside:avoid}.sec,.band-or td,.band-te td,th,.card .lb,.bill .hd,.kv h4,tr.net td,tr.tot-or td,tr.tot-te td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<div class="top noprint"><h1>MACHINE USAGE BILL REPORT MAKER</h1><p>Drop your regular loan-machine Excel → get the month-wise usage bill (Fridays &amp; closed holidays not billed). Everything runs inside this page – your file never leaves your computer.</p></div>
+<div class="wrap">
+<div class="panel noprint">
+  <h2>① Your regular Excel</h2>
+  <div class="drop" id="drop"><b>Click here or drop your .xlsx file</b><small>Sheets like LOAN TO AST, LOAN FROM WELLLORD-, Loan to Appear, Loan To Printing, Send To Bhdp … are found automatically</small><input type="file" id="file" accept=".xlsx,.xlsm" class="hide"></div>
+  <div id="status" class="muted" style="margin-top:8px"></div>
+</div>
+<div class="panel noprint" id="settings">
+  <h2>② Report month &amp; settings</h2>
+  <div class="row">
+    <div><label>Report month</label><input type="month" id="month" class="in"></div>
+    <div><label>Count the return day?</label><select id="inc" class="in"><option value="1">Yes – dispatch and return day billed</option><option value="0">No – return day not billed</option></select></div>
+    <div><label>Holidays of new years</label><select id="automode" class="in"><option value="recent">Auto-generate if not entered</option><option value="all">Auto-generate for ALL years</option><option value="off">Off – only holidays I enter</option></select></div>
+    <div><button id="go" class="alt">Make report</button></div>
+    <div><button id="xl" class="hide">⬇ Download Excel report</button></div>
+    <div><button id="prt" class="ghost hide">🖨 Print this tab</button></div>
+  </div>
+  <details><summary>Rate per machine-day (to be given by Accounts) – leave blank until known</summary><div class="scroll"><table id="rates" style="margin-top:8px;max-width:640px"></table></div></details>
+  <details><summary>Holidays – closed = no bill · open = factory runs and day is billed (Hindu festivals)</summary>
+    <div class="muted" style="margin:6px 0">Friday is always off. Add new holiday dates here (Eid dates change every year). Settings are remembered in this browser.</div>
+    <div class="scroll"><table id="hols" style="max-width:760px"></table></div>
+    <div style="margin-top:8px"><button class="ghost" id="addhol">+ Add holiday</button> <button class="ghost" id="reshol">Reset to 2026 defaults</button></div></details>
+  <details><summary>Date corrections (fix a wrong date without touching your register)</summary>
+    <div class="scroll"><table id="corrs" style="max-width:900px;margin-top:8px"></table></div>
+    <div style="margin-top:8px"><button class="ghost" id="addcorr">+ Add correction</button></div></details>
+</div>
+<div id="out" class="hide">
+  <div id="warnbox" class="noprint"></div>
+  <div class="tabs noprint" id="tabs"></div>
+  <div id="panes"></div>
+</div>
+</div>
+<script>
+/* ================= DATE HELPERS (all dates are integer day numbers, UTC) ================= */
+const DN=(y,m,d)=>Math.floor(Date.UTC(y,m-1,d)/864e5);
+const ymd=n=>{const d=new Date(n*864e5);return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate()};};
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const p2=n=>String(n).padStart(2,'0');
+const fmtD=n=>{if(n==null)return '';const t=ymd(n);return p2(t.d)+'-'+MON[t.m-1]+'-'+String(t.y).slice(2);};
+const fmtDL=n=>{const t=ymd(n);return p2(t.d)+'-'+MON[t.m-1]+'-'+t.y;};
+const fmtM=n=>{const t=ymd(n);return MON[t.m-1]+'-'+String(t.y).slice(2);};
+const fmtML=n=>{const t=ymd(n);return MONL[t.m-1]+' '+t.y;};
+const mStart=(y,m)=>DN(y,m,1);
+const addM=(n,k)=>{const t=ymd(n);const z=t.y*12+(t.m-1)+k;return DN(Math.floor(z/12),z%12+1,1);};
+const eom=n=>addM(n,1)-1;
+const isFri=n=>new Date(n*864e5).getUTCDay()===5;
+const num=(v,d=0)=>(v==null||v===''||isNaN(v))?'–':(Math.round(v*100)/100).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
+const UNITS=['AST','Well Lord','Appear','Printing','BHDP (Fabric Store)'];
+const DIRS=['SENT TO','RECEIVED FROM'];
+const UCOL=['#2F5D9E','#E8A33D','#8E6BBF','#3BA99C','#9AA5B5'];
+
+function parseDateAny(v){
+  if(v==null||v==='')return null;
+  if(typeof v==='object'&&v.dn!=null)return v.dn;
+  if(typeof v==='string'){
+    const t=v.trim(); if(!t)return null; let m;
+    if(m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))return DN(+m[1],+m[2],+m[3]);
+    if(m=t.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2}|\d{4})$/)){let y=+m[3];if(y<100)y+=2000;return DN(y,+m[2],+m[1]);}
+    if(m=t.match(/^(\d{1,2})[ -]([A-Za-z]{3})[a-z]*[ -](\d{2}|\d{4})$/)){const mi=MON.findIndex(x=>x.toLowerCase()===m[2].toLowerCase());if(mi>=0){let y=+m[3];if(y<100)y+=2000;return DN(y,mi+1,+m[1]);}}
+  }
+  throw new Error('unreadable date: '+v);
+}
+const norm=s=>String(s==null?'':s).toLowerCase().replace(/[^a-z]/g,'');
+const clean=v=>{if(v==null)return null;if(typeof v==='string'){v=v.trim();return v?v:null;}return v;};
+
+/* ================= XLSX READER (no libraries: native DecompressionStream) ================= */
+async function unzip(buf){
+  const u8=new Uint8Array(buf),dv=new DataView(buf);
+  let e=u8.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;
+  if(e<0)throw new Error('Not a valid .xlsx file');
+  const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const files={};const td=new TextDecoder();
+  for(let i=0;i<n;i++){
+    if(dv.getUint32(p,true)!==0x02014b50)throw new Error('Corrupt zip directory');
+    const method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lho=dv.getUint32(p+42,true);
+    files[td.decode(u8.subarray(p+46,p+46+nl))]={method,csize,lho};p+=46+nl+el+cl;
+  }
+  return {names:Object.keys(files),async read(name){
+    const f=files[name];if(!f)return null;const lp=f.lho;
+    const st=lp+30+dv.getUint16(lp+26,true)+dv.getUint16(lp+28,true);const data=u8.subarray(st,st+f.csize);
+    if(f.method===0)return data;
+    const ds=new DecompressionStream('deflate-raw');
+    return new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(ds)).arrayBuffer());
+  }};
+}
+const xmlDoc=s=>new DOMParser().parseFromString(s,'application/xml');
+const tagsOf=(n,name)=>Array.from(n.getElementsByTagNameNS('*',name));
+const colIdx=ref=>{let c=0;const m=ref.match(/^([A-Z]+)/)[1];for(const ch of m)c=c*26+ch.charCodeAt(0)-64;return c-1;};
+const rowIdx=ref=>parseInt(ref.match(/(\d+)$/)[1],10);
+function isDateFmt(id,code){
+  if((id>=14&&id<=22)||(id>=27&&id<=36)||(id>=45&&id<=47)||(id>=50&&id<=58))return true;
+  if(!code)return false;
+  const c=code.replace(/"[^"]*"/g,'').replace(/\[[^\]]*\]/g,'').replace(/\\./g,'');
+  return /[dmyh]/i.test(c)&&!/^(General|0|#)/i.test(c.trim())&&/[dy]/i.test(c);
+}
+async function readXlsx(buf){
+  const z=await unzip(buf),td=new TextDecoder();
+  const txt=async n=>{const b=await z.read(n);return b?td.decode(b):null;};
+  const wbx=xmlDoc(await txt('xl/workbook.xml')),rels=xmlDoc(await txt('xl/_rels/workbook.xml.rels'));
+  const relMap={};tagsOf(rels,'Relationship').forEach(r=>relMap[r.getAttribute('Id')]=r.getAttribute('Target'));
+  const shared=[];const ss=await txt('xl/sharedStrings.xml');
+  if(ss)tagsOf(xmlDoc(ss),'si').forEach(si=>shared.push(tagsOf(si,'t').map(t=>t.textContent).join('')));
+  const dateXf=[];const sty=await txt('xl/styles.xml');
+  if(sty){const sd=xmlDoc(sty);const nf={};tagsOf(sd,'numFmt').forEach(x=>nf[x.getAttribute('numFmtId')]=x.getAttribute('formatCode'));
+    const cx=tagsOf(sd,'cellXfs')[0];if(cx)Array.from(cx.children).forEach(x=>{const id=+x.getAttribute('numFmtId');dateXf.push(isDateFmt(id,nf[id]));});}
+  const sheets=[];
+  for(const sh of tagsOf(wbx,'sheet')){
+    const rid=sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')||sh.getAttribute('r:id');
+    let tgt=relMap[rid];if(!tgt)continue;tgt=tgt.replace(/^\//,'');const path=tgt.startsWith('xl/')?tgt:'xl/'+tgt;
+    const x=await txt(path);if(!x)continue;
+    const rows=[];
+    tagsOf(xmlDoc(x),'c').forEach(c=>{
+      const ref=c.getAttribute('r');if(!ref)return;const r=rowIdx(ref)-1,ci=colIdx(ref);if(ci>40)return;
+      const t=c.getAttribute('t'),vEl=tagsOf(c,'v')[0];let v=null;
+      if(t==='inlineStr'){v=tagsOf(c,'t').map(q=>q.textContent).join('');}
+      else if(vEl){const raw=vEl.textContent;
+        if(t==='s')v=shared[+raw];else if(t==='str')v=raw;else if(t==='b')v=raw==='1';else if(t==='e')v=null;
+        else{const f=parseFloat(raw);v=isNaN(f)?null:f;const si=+c.getAttribute('s');if(v!=null&&dateXf[si])v={dn:Math.floor(v)-25569};}}
+      if(v==null)return;(rows[r]||(rows[r]=[]))[ci]=v;
+    });
+    sheets.push({name:sh.getAttribute('name'),rows});
+  }
+  return sheets;
+}
+
+/* ================= REGISTER LOADER ================= */
+function sheetParty(name){
+  const m=norm(name).match(/^(loan|send)(to|from)(.*)$/);if(!m)return null;
+  const d=m[2]==='to'?'SENT TO':'RECEIVED FROM',r=m[3];
+  if(r==='ast')return ['AST',d];if(r.includes('well'))return ['Well Lord',d];if(r.includes('appear'))return ['Appear',d];
+  if(r.includes('print'))return ['Printing',d];if(r.includes('bhdp'))return ['BHDP (Fabric Store)',d];return null;
+}
+function detectColumns(rows){
+  for(let hr=0;hr<Math.min(16,rows.length);hr++){
+    const row=rows[hr];if(!row)continue;const cells={};
+    row.forEach((v,i)=>{if(typeof v==='string'&&i<20)cells[i]=norm(v);});
+    const ks=Object.keys(cells).map(Number);
+    const dates=ks.filter(i=>cells[i]==='date'),qtys=ks.filter(i=>/^(qty|quantity)/.test(cells[i]));
+    if(dates.length&&qtys.length>=2){
+      const c={d:dates[0],q:qtys[0],rq:qtys[1]};
+      const chs=ks.filter(i=>cells[i].startsWith('ch')||cells[i].includes('challan'));if(!chs.length)continue;c.ch=Math.min(...chs);
+      const f1=k=>{const x=ks.filter(i=>cells[i].includes(k));return x.length?x[0]:null;};
+      c.mc=f1('name');c.br=f1('brand');c.mo=f1('model');
+      const sl=ks.filter(i=>cells[i].startsWith('sl'));c.sl=sl.length?sl[0]:null;c.bu=f1('billing');
+      const rd=ks.filter(i=>i>c.q&&(cells[i].includes('rcv')||cells[i]==='date')&&!cells[i].includes('exptd'));if(!rd.length)continue;c.rd=rd[0];
+      const rch=chs.filter(i=>i>c.rd);c.rch=rch.length?rch[0]:null;
+      return {hr,c};
+    }
+  }
+  return null;
+}
+function readHolidaySheet(rows){
+  let hr=-1,cd=0,cn=1,cf=2;
+  for(let i=0;i<Math.min(15,rows.length);i++){const r=rows[i];if(!r)continue;
+    const idx=r.map((v,j)=>[norm(v),j]);const d=idx.find(x=>x[0]==='date'||x[0]==='holidaydate');
+    if(d){hr=i;cd=d[1];const n=idx.find(x=>/holiday|name|festival|occasion|description/.test(x[0])&&x[1]!==cd);if(n)cn=n[1];const f=idx.find(x=>/closed|open|status|billed|bill/.test(x[0])&&x[1]!==cd);if(f)cf=f[1];break;}}
+  const out=[];
+  for(let i=hr+1;i<rows.length;i++){const r=rows[i];if(!r)continue;let d=null;try{d=parseDateAny(r[cd]);}catch(e){continue;}if(d==null)continue;
+    const fv=r[cf];let closed=1;
+    if(typeof fv==='number')closed=fv===0?0:1;else if(typeof fv==='string'){const t=fv.trim().toLowerCase();if(['0','open','billed','bill','no','working','factory open','run'].includes(t)||/open|billed|working/.test(t))closed=0;}
+    out.push({dn:d,name:clean(r[cn])||'Holiday',closed});}
+  return out;
+}
+function loadRegister(sheets){
+  const rows=[],log=[],hols=[];
+  for(const sh of sheets){
+    if(/holiday/.test(norm(sh.name))){const hs=readHolidaySheet(sh.rows);hols.push(...hs);log.push({sheet:sh.name,unit:'-',dir:'-',lines:0,qty:0,skipped:[],note:`HOLIDAY sheet read automatically: ${hs.length} dates (these replace automatic holidays for their years)`});continue;}
+    const sp=sheetParty(sh.name);
+    if(!sp){log.push({sheet:sh.name,unit:'-',dir:'-',lines:0,qty:0,skipped:[],note:'Not a loan sheet for a known unit – ignored'});continue;}
+    const det=detectColumns(sh.rows);
+    if(!det){log.push({sheet:sh.name,unit:sp[0],dir:sp[1],lines:0,qty:0,skipped:[],note:'Header row (DATE / QTY) not found – sheet NOT read'});continue;}
+    const {hr,c}=det;let n=0,qs=0;const skipped=[];
+    for(let r=hr+1;r<sh.rows.length;r++){
+      const row=sh.rows[r];if(!row)continue;const g=k=>(c[k]==null?null:row[c[k]]);
+      const q=g('q');if(typeof q!=='number'||q<=0)continue;
+      let d=null;try{d=parseDateAny(g('d'));}catch(e){d=null;}
+      const name=clean(g('mc'));
+      if(d==null){if(name||g('ch'))skipped.push([r+1,'date missing/unreadable ('+JSON.stringify(g('d'))+') – qty '+q]);continue;}
+      let rd=null;try{rd=parseDateAny(g('rd'));}catch(e){skipped.push([r+1,'return date unreadable ('+JSON.stringify(g('rd'))+') – treated as NOT returned']);}
+      const rq=g('rq');
+      rows.push({sheet:sh.name,src:r+1,unit:sp[0],dir:sp[1],date:d,ch:clean(g('ch')),mc:name,br:clean(g('br')),mo:clean(g('mo')),sl:clean(g('sl')),qty:q,rdate:rd,rch:clean(g('rch')),rqty:typeof rq==='number'?rq:null,bu:clean(g('bu'))});
+      n++;qs+=q;
+    }
+    log.push({sheet:sh.name,unit:sp[0],dir:sp[1],lines:n,qty:qs,skipped,note:''});
+  }
+  return {rows,log,hols};
+}
+
+/* ================= AUTO HOLIDAYS ================= */
+function autoHolidays(y){
+  const out=[];const add=(dn,name,closed,kind)=>out.push({dn,name,closed,kind});
+  [[2,21,'Shaheed Day & International Mother Language Day'],[3,26,'Independence & National Day'],[4,14,'Bangla New Year (Pahela Baishakh)'],[5,1,'May Day'],[8,5,'July Mass Uprising Day'],[12,16,'Victory Day'],[12,25,'Christmas Day']].forEach(([m,d,n])=>add(DN(y,m,d),n,1,'fixed'));
+  try{
+    const f=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric',month:'numeric',year:'numeric',timeZone:'UTC'});
+    for(let n=DN(y,1,1)-3;n<=DN(y,12,31);n++){
+      const p={};f.formatToParts(new Date(n*864e5)).forEach(x=>{if(x.type!=='literal')p[x.type]=+x.value;});
+      const bd=n+1; if(bd<DN(y,1,1)||bd>DN(y,12,31))continue;   // Bangladesh moon sighting is normally 1 day after Saudi
+      if(p.month===10&&p.day===1)for(let k=-2;k<=3;k++)add(bd+k,k===0?'Eid-ul-Fitr (ESTIMATED)':'Eid-ul-Fitr vacation (ESTIMATED)',1,'est');
+      if(p.month===12&&p.day===10)for(let k=-2;k<=3;k++)add(bd+k,k===0?'Eid-ul-Azha (ESTIMATED)':'Eid-ul-Azha vacation (ESTIMATED)',1,'est');
+      if(p.month===1&&p.day===10)add(bd,'Ashura (ESTIMATED)',1,'est');
+      if(p.month===3&&p.day===12)add(bd,'Eid-e-Miladunnabi (ESTIMATED)',1,'est');
+      if(p.month===9&&p.day===27)add(bd,'Shab-e-Qadr (ESTIMATED)',1,'est');
+    }
+  }catch(e){}
+  const seen=new Set();return out.filter(h=>!seen.has(h.dn)&&seen.add(h.dn));
+}
+
+/* ================= ENGINE ================= */
+const DEFAULT_HOL=[[2,21,'Shaheed Day & International Mother Language Day',1],[3,18,'Eid-ul-Fitr vacation (extra holiday)',1],[3,19,'Eid-ul-Fitr vacation',1],[3,20,'Jumatul Bida / Eid vacation',1],[3,21,'Eid-ul-Fitr',1],[3,22,'Eid-ul-Fitr vacation',1],[3,23,'Eid-ul-Fitr vacation',1],[3,26,'Independence & National Day',1],[4,14,'Bangla New Year (Pahela Baishakh)',1],[5,1,'May Day / Buddha Purnima',1],[5,26,'Eid-ul-Azha vacation',1],[5,27,'Eid-ul-Azha vacation',1],[5,28,'Eid-ul-Azha',1],[5,29,'Eid-ul-Azha vacation',1],[5,30,'Eid-ul-Azha vacation',1],[5,31,'Eid-ul-Azha vacation',1],[6,26,'Ashura',1],[8,5,'July Mass Uprising Day',1],[8,26,'Eid-e-Miladunnabi',1],[9,4,'Janmashtami (Hindu festival – factory open)',0],[10,20,'Durga Puja – Mahanabami (Hindu festival – factory open)',0],[10,21,'Durga Puja – Bijoya Dashami (Hindu festival – factory open)',0],[12,16,'Victory Day',1],[12,25,'Christmas Day',1]];
+const defaultHolidays=()=>DEFAULT_HOL.map(([m,d,name,closed])=>({dn:DN(2026,m,d),name,closed}));
+const defaultCorr=()=>[{sheet:'LOAN TO WELL LORD',row:93,field:'return_date',dn:DN(2023,2,11),note:'Register showed 11-Feb-2022 (before dispatch); corrected to 11-Feb-2023'}];
+
+function compute(reg,cfg){
+  const rows=reg.rows.map(x=>({...x,flags:[]}));
+  const notes=[];
+  for(const c of cfg.corr){
+    const hit=rows.find(x=>x.sheet.trim().toLowerCase()===String(c.sheet).trim().toLowerCase()&&x.src===+c.row);
+    if(!hit){notes.push(`${c.sheet} row ${c.row}: not found in this register – ignored`);continue;}
+    if(c.field==='return_date')hit.rdate=c.dn;else hit.date=c.dn;
+    hit.flags.push(`Corrected ${c.field.replace('_',' ')} to ${fmtDL(c.dn)}. ${c.note||''}`.trim());
+    notes.push(`${c.sheet} row ${c.row}: applied ${c.field} → ${fmtDL(c.dn)}`);
+  }
+  UNITS.forEach(u=>DIRS.forEach(d=>{}));
+  rows.sort((a,b)=>UNITS.indexOf(a.unit)-UNITS.indexOf(b.unit)||DIRS.indexOf(a.dir)-DIRS.indexOf(b.dir)||a.src-b.src);
+  const rm=cfg.month;const RM=mStart(rm.y,rm.m),ASOF=eom(RM);
+  const minD=Math.min(...rows.map(x=>x.date)),maxD=Math.max(...rows.map(x=>Math.max(x.date,x.rdate||0)));
+  const t0=ymd(minD),FM=mStart(t0.y,t0.m),END_Y=Math.max(2027,rm.y+1,ymd(maxD).y+1);
+  const calStart=FM-31,calEnd=DN(END_Y,12,31);
+  const byDn=new Map();cfg.hol.forEach(h=>byDn.set(h.dn,{dn:h.dn,name:h.name,closed:+h.closed,src:'manual'}));(reg.hols||[]).forEach(h=>byDn.set(h.dn,{...h,src:'sheet'}));
+  const yearsHave=new Set([...byDn.values()].map(h=>ymd(h.dn).y));const autoMode=cfg.autoMode||'recent',startY=autoMode==='all'?t0.y:rm.y-1,autoYears=[];
+  if(autoMode!=='off')for(let y=startY;y<=rm.y;y++)if(!yearsHave.has(y)){autoYears.push(y);autoHolidays(y).forEach(h=>{if(!byDn.has(h.dn))byDn.set(h.dn,{...h,src:'auto'});});}
+  const holEff=[...byDn.values()].sort((a,b)=>a.dn-b.dn);
+  const closed=new Set(holEff.filter(h=>h.closed==1).map(h=>h.dn));
+  const cum=new Int32Array(calEnd-calStart+1);let acc=0;
+  for(let i=0;i<cum.length;i++){const d=calStart+i;if(!(isFri(d)||closed.has(d)))acc++;cum[i]=acc;}
+  const cumAt=d=>d<calStart?0:(d>calEnd?cum[cum.length-1]:cum[d-calStart]);
+  const inc=cfg.inc?1:0;
+  for(const x of rows){
+    x.status=x.date>ASOF?'FUTURE':(x.rdate==null||x.rdate>ASOF?'RUNNING':'RETURNED');
+    x.O=x.status==='FUTURE'?x.date:(x.status==='RUNNING'?ASOF+1:x.rdate+inc);
+    x.calTotal=Math.max(0,x.O-x.date);
+    x.billTotal=Math.max(0,cumAt(x.O-1)-cumAt(x.date-1));
+    x.rate=cfg.rates[x.unit+'|'+x.dir]||0;
+  }
+  const mdays=(x,ms,me1)=>{const lo=Math.max(x.date,ms),hi=Math.min(x.O,me1);return hi<=lo?0:x.qty*(cumAt(hi-1)-cumAt(lo-1));};
+  const cdays=(x,ms,me1)=>{const lo=Math.max(x.date,ms),hi=Math.min(x.O,me1);return hi<=lo?0:x.qty*(hi-lo);};
+  for(const x of rows){x.mdays=mdays(x,RM,ASOF+1);x.cdays=cdays(x,RM,ASOF+1);x.amount=x.mdays*x.rate;}
+  /* flags */
+  for(const x of rows){
+    if(x.rdate!=null&&x.rdate<x.date)x.flags.push('Return date is BEFORE date out – check the register; 0 days are billed for this line.');
+    if(x.rdate==null){const d=ASOF-x.date;if(d>365)x.flags.push('Running over 1 year – confirm with the unit; usage keeps accruing monthly until returned.');}
+    else{const d=x.rdate-x.date;if(d>1000)x.flags.push(`Held ${d} days before return – long hold, check dates.`);}
+  }
+  const by={};
+  rows.forEach(x=>{const sl=x.sl==null?'':String(x.sl).trim().toUpperCase();if(sl&&!['NA','-','N/A','NONE'].includes(sl))(by[x.unit+'|'+x.dir+'|'+sl]||(by[x.unit+'|'+x.dir+'|'+sl]=[])).push(x);});
+  Object.entries(by).forEach(([k,xs])=>{xs.sort((a,b)=>a.date-b.date);const sl=k.split('|')[2];
+    for(let i=0;i+1<xs.length;i++){const a=xs[i],b=xs[i+1];
+      if(a.rdate==null||b.date<a.rdate){a.flags.push(`Serial ${sl} also listed again on ${fmtDL(b.date)} (row ${b.src}, sheet ${b.sheet}) before this line was returned – possible duplicate; days may be double counted.`);
+        b.flags.push(`Serial ${sl} was still out on row ${a.src} when this line started – possible duplicate; days may be double counted.`);}}});
+  /* months grid */
+  const months=[];for(let m=FM;m<=DN(END_Y,12,1);m=addM(m,1))months.push(m);
+  const grid={};UNITS.forEach(u=>DIRS.forEach(d=>grid[u+'|'+d]=new Array(months.length).fill(0)));
+  rows.forEach(x=>{const g=grid[x.unit+'|'+x.dir];months.forEach((ms,i)=>{if(ms>ASOF)return;g[i]+=mdays(x,ms,addM(ms,1));});});
+  const mi=m=>months.indexOf(m);
+  const groups=[];
+  UNITS.forEach(u=>DIRS.forEach(d=>{
+    const xs=rows.filter(x=>x.unit===u&&x.dir===d),g=grid[u+'|'+d],run=xs.filter(x=>x.status==='RUNNING');
+    const iR=mi(RM),yS=DN(rm.y,1,1);let ytd=0;months.forEach((ms,i)=>{if(ms>=yS&&ms<=RM)ytd+=g[i];});
+    const E=g[iR]||0,F=iR>0?g[iR-1]:0,rate=cfg.rates[u+'|'+d]||0;
+    groups.push({unit:u,dir:d,lines:xs.length,running:run.reduce((a,x)=>a+x.qty,0),longest:run.length?Math.max(...run.map(x=>x.calTotal)):0,
+      E,F,ytd,rate,amount:E*rate,billed:xs.filter(x=>x.mdays>0).reduce((a,x)=>a+x.qty,0),over90:run.filter(x=>x.calTotal>90).reduce((a,x)=>a+x.qty,0),over365:run.filter(x=>x.calTotal>365).reduce((a,x)=>a+x.qty,0)});
+  }));
+  const tot=d=>{const gs=groups.filter(g=>g.dir===d);return {E:gs.reduce((a,g)=>a+g.E,0),F:gs.reduce((a,g)=>a+g.F,0),ytd:gs.reduce((a,g)=>a+g.ytd,0),amount:gs.reduce((a,g)=>a+g.amount,0),running:gs.reduce((a,g)=>a+g.running,0),longest:Math.max(0,...gs.map(g=>g.longest)),billed:gs.reduce((a,g)=>a+g.billed,0),over90:gs.reduce((a,g)=>a+g.over90,0),over365:gs.reduce((a,g)=>a+g.over365,0)};};
+  const trend=[];for(let k=11;k>=0;k--){const ms=addM(RM,-k),i=mi(ms);trend.push({ms,label:fmtM(ms),vals:UNITS.map(u=>DIRS.map(d=>(i>=0?grid[u+'|'+d][i]:0)))});}
+  const hist=ymd(RM).y;
+  return {holEff,autoYears,yearsHave:[...yearsHave].sort(),rows,months,grid,groups,sent:tot('SENT TO'),recv:tot('RECEIVED FROM'),trend,RM,ASOF,FM,END_Y,inc,cfg,corrNotes:notes,reg,cumAt,
+    running:rows.filter(x=>x.status==='RUNNING').sort((a,b)=>b.calTotal-a.calTotal),log:reg.log};
+}
+/* ================= XLSX WRITER (no libraries) ================= */
+const crcT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+const crc32=u=>{let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;};
+function zipStore(files){ // files: [{name, data:Uint8Array}]
+  const te=new TextEncoder(),parts=[],cd=[];let off=0;
+  const u16=v=>{const b=new Uint8Array(2);new DataView(b.buffer).setUint16(0,v,true);return b;};
+  const u32=v=>{const b=new Uint8Array(4);new DataView(b.buffer).setUint32(0,v>>>0,true);return b;};
+  const cat=a=>{let n=0;a.forEach(x=>n+=x.length);const o=new Uint8Array(n);let p=0;a.forEach(x=>{o.set(x,p);p+=x.length;});return o;};
+  for(const f of files){
+    const nm=te.encode(f.name),crc=crc32(f.data),sz=f.data.length;
+    const lh=cat([u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(crc),u32(sz),u32(sz),u16(nm.length),u16(0),nm]);
+    parts.push(lh,f.data);
+    cd.push(cat([u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(crc),u32(sz),u32(sz),u16(nm.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off),nm]));
+    off+=lh.length+sz;
+  }
+  const cdb=cat(cd);
+  const end=cat([u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cdb.length),u32(off),u16(0)]);
+  return cat([...parts,cdb,end]);
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'');
+const colL=n=>{let s='';n++;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26);}return s;};
+class Styles{
+  constructor(){this.fonts=['<font><sz val="10"/><name val="Arial"/></font>'];this.fills=['<fill><patternFill patternType="none"/></fill>','<fill><patternFill patternType="gray125"/></fill>'];
+    this.borders=['<border><left/><right/><top/><bottom/><diagonal/></border>'];this.nfs=[];this.xfs=['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'];this.cache={};}
+  idx(arr,x){let i=arr.indexOf(x);if(i<0){arr.push(x);i=arr.length-1;}return i;}
+  get(o){
+    const key=JSON.stringify(o);if(this.cache[key]!=null)return this.cache[key];
+    const col=c=>'FF'+String(c).replace('#','').toUpperCase();
+    const font=`<font>${o.b?'<b/>':''}${o.i?'<i/>':''}<sz val="${o.sz||10}"/><color rgb="${col(o.c||'222B38')}"/><name val="Arial"/></font>`;
+    const fill=o.bg?`<fill><patternFill patternType="solid"><fgColor rgb="${col(o.bg)}"/><bgColor indexed="64"/></patternFill></fill>`:null;
+    const side=(n,st,c)=>st?`<${n} style="${st}"><color rgb="${col(c||'D5DBE3')}"/></${n}>`:`<${n}/>`;
+    let bd;const b=o.bd;
+    if(!b)bd=null;else if(b==='all')bd=`<border>${side('left','thin')}${side('right','thin')}${side('top','thin')}${side('bottom','thin')}<diagonal/></border>`;
+    else if(b==='bottom')bd=`<border><left/><right/><top/>${side('bottom','hair')}<diagonal/></border>`;
+    else if(b==='tb')bd=`<border><left/><right/>${side('top','medium','1F3A5F')}${side('bottom','medium','1F3A5F')}<diagonal/></border>`;
+    else if(b==='top')bd=`<border><left/><right/>${side('top','thin','222B38')}<bottom/><diagonal/></border>`;
+    let nf=0;if(o.nf){let i=this.nfs.indexOf(o.nf);if(i<0){this.nfs.push(o.nf);i=this.nfs.length-1;}nf=164+i;}
+    const al=`<alignment horizontal="${o.h||'general'}" vertical="${o.v||'center'}"${o.w?' wrapText="1"':''}${o.ind?` indent="${o.ind}"`:''}/>`;
+    const xf=`<xf numFmtId="${nf}" fontId="${this.idx(this.fonts,font)}" fillId="${fill?this.idx(this.fills,fill):0}" borderId="${bd?this.idx(this.borders,bd):0}" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1">${al}</xf>`;
+    this.xfs.push(xf);return this.cache[key]=this.xfs.length-1;
+  }
+  xml(){return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +(this.nfs.length?`<numFmts count="${this.nfs.length}">${this.nfs.map((f,i)=>`<numFmt numFmtId="${164+i}" formatCode="${esc(f)}"/>`).join('')}</numFmts>`:'')
+    +`<fonts count="${this.fonts.length}">${this.fonts.join('')}</fonts><fills count="${this.fills.length}">${this.fills.join('')}</fills><borders count="${this.borders.length}">${this.borders.join('')}</borders>`
+    +`<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${this.xfs.length}">${this.xfs.join('')}</cellXfs>`
+    +'<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';}
+}
+class Sheet{
+  constructor(wb,name,o={}){this.wb=wb;this.name=name;this.cells=new Map();this.merges=[];this.widths={};this.heights={};this.breaks=[];this.tab=o.tab||null;this.freeze=o.freeze||null;this.landscape=o.landscape!==false;this.fitH=o.fitH==null?0:o.fitH;this.grid=false;}
+  set(r,c,v,st){this.cells.set(r+','+c,{r,c,v,s:st?this.wb.st.get(st):0});}
+  fill(r1,c1,r2,c2,st){for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++)if(!this.cells.has(r+','+c))this.set(r,c,null,st);else this.cells.get(r+','+c).s=this.wb.st.get(st);}
+  merge(r1,c1,r2,c2,v,st){this.merges.push(`${colL(c1-1)}${r1}:${colL(c2-1)}${r2}`);this.fill(r1,c1,r2,c2,st||{});if(v!=null)this.cells.get(r1+','+c1).v=v;}
+  xml(){
+    const rows={};this.cells.forEach(x=>(rows[x.r]||(rows[x.r]=[])).push(x));
+    let mr=0,mc=0;this.cells.forEach(x=>{mr=Math.max(mr,x.r);mc=Math.max(mc,x.c);});
+    const cols=Object.keys(this.widths).map(Number).sort((a,b)=>a-b).map(c=>`<col min="${c}" max="${c}" width="${this.widths[c]}" customWidth="1"/>`).join('');
+    let sd='';
+    Object.keys(rows).map(Number).sort((a,b)=>a-b).forEach(r=>{
+      const ht=this.heights[r];sd+=`<row r="${r}"${ht?` ht="${ht}" customHeight="1"`:''}>`;
+      rows[r].sort((a,b)=>a.c-b.c).forEach(x=>{
+        const ref=colL(x.c-1)+r;let v=x.v;
+        if(v==null||v==='')sd+=`<c r="${ref}" s="${x.s}"/>`;
+        else if(typeof v==='number')sd+=`<c r="${ref}" s="${x.s}"><v>${v}</v></c>`;
+        else sd+=`<c r="${ref}" s="${x.s}" t="inlineStr"><is><t xml:space="preserve">${esc(v)}</t></is></c>`;
+      });sd+='</row>';
+    });
+    let pane='';if(this.freeze){const [fr,fc]=this.freeze;pane=`<pane ${fc?`xSplit="${fc}" `:''}${fr?`ySplit="${fr}" `:''}topLeftCell="${colL(fc)}${fr+1}" activePane="${fr&&fc?'bottomRight':(fr?'bottomLeft':'topRight')}" state="frozen"/>`;}
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+      +`<sheetPr>${this.tab?`<tabColor rgb="FF${this.tab.replace('#','')}"/>`:''}<pageSetUpPr fitToPage="1"/></sheetPr>`
+      +`<sheetViews><sheetView ${this.grid?'':'showGridLines="0" '}workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>`
+      +(cols?`<cols>${cols}</cols>`:'')+`<sheetData>${sd}</sheetData>`
+      +(this.merges.length?`<mergeCells count="${this.merges.length}">${this.merges.map(m=>`<mergeCell ref="${m}"/>`).join('')}</mergeCells>`:'')
+      +'<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>'
+      +`<pageSetup paperSize="9" orientation="${this.landscape?'landscape':'portrait'}" fitToWidth="1" fitToHeight="${this.fitH}"/>`
+      +(this.breaks.length?`<rowBreaks count="${this.breaks.length}" manualBreakCount="${this.breaks.length}">${this.breaks.map(b=>`<brk id="${b}" max="16383" man="1"/>`).join('')}</rowBreaks>`:'')
+      +'</worksheet>';
+  }
+}
+class Workbook{
+  constructor(){this.sheets=[];this.st=new Styles();}
+  add(name,o){const s=new Sheet(this,name.slice(0,31),o);this.sheets.push(s);return s;}
+  build(){
+    const te=new TextEncoder(),H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',f=[];
+    f.push({name:'[Content_Types].xml',data:te.encode(H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+this.sheets.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+'</Types>')});
+    f.push({name:'_rels/.rels',data:te.encode(H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>')});
+    f.push({name:'xl/workbook.xml',data:te.encode(H+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>'+this.sheets.map((s,i)=>`<sheet name="${esc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')+'</sheets></workbook>')});
+    f.push({name:'xl/_rels/workbook.xml.rels',data:te.encode(H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+this.sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')+`<Relationship Id="rId${this.sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`)});
+    const sheetsXml=this.sheets.map(s=>s.xml());
+    this.sheets.forEach((s,i)=>f.push({name:`xl/worksheets/sheet${i+1}.xml`,data:te.encode(sheetsXml[i])}));
+    f.push({name:'xl/styles.xml',data:te.encode(this.st.xml())});
+    return zipStore(f);
+  }
+}
+const serial=dn=>dn+25569;
+/* ================= EXCEL EXPORT (values, styled) ================= */
+function buildExcel(R){
+  const wb=new Workbook(),C={NAVY:'1F3A5F',OR:'E8710A',ORL:'FDEBD3',ORD:'9A4A00',TE:'0E8C7F',TEL:'D5F0EC',TED:'075E55',RED:'C62828',REDL:'FDE8E8',GR:'F3F5F8',MID:'5B6B7F',DK:'222B38',WH:'FFFFFF'};
+  const g=(u,d)=>R.groups.find(x=>x.unit===u&&x.dir===d);
+  const NF0='#,##0;-#,##0;"–"',NF2='#,##0.00;-#,##0.00;"–"',SG='+#,##0;-#,##0;"–"';
+  const title=(ws,c2,t,sub,h1=40)=>{ws.merge(1,2,1,c2,t,{b:1,sz:22,c:C.WH,bg:C.NAVY,v:'center',ind:1});ws.heights[1]=h1;
+    ws.merge(2,2,2,c2,sub,{sz:10,c:'C9D6E8',bg:C.NAVY,v:'center',ind:1});ws.heights[2]=22;};
+  const section=(ws,r,c1,c2,t,bg=C.NAVY)=>{ws.merge(r,c1,r,c2,t,{b:1,sz:10,c:C.WH,bg,ind:1});ws.heights[r]=20;};
+  const card=(ws,r,c1,c2,label,val,sub,col,colL,colD,nf)=>{
+    ws.merge(r,c1,r,c2,label,{b:1,sz:9,c:C.WH,bg:col,h:'center'});ws.merge(r+1,c1,r+2,c2,val,{b:1,sz:26,c:colD,bg:colL,h:'center',nf:nf||'#,##0'});
+    ws.merge(r+3,c1,r+3,c2,sub,{i:1,sz:8,c:C.MID,bg:colL,h:'center'});ws.heights[r]=22;ws.heights[r+1]=22;ws.heights[r+2]=22;ws.heights[r+3]=20;};
+  const S=R.sent,V=R.recv,net=S.E-V.E;
+  const monthLbl=fmtML(R.RM),per=`${fmtDL(R.RM)} to ${fmtDL(R.ASOF)}`;
+  const basis='Billable days = calendar days less Fridays & factory-closed holidays (Hindu festivals billed – factory open)';
+
+  /* ---------- Dashboard ---------- */
+  let ws=wb.add('Bill Dashboard',{tab:C.NAVY,fitH:1});ws.widths[1]=2;ws.widths[2]=24;for(let c=3;c<=13;c++)ws.widths[c]=13.2;
+  title(ws,13,'INTER-UNIT MACHINE USAGE & BILL REPORT',`${monthLbl}  |  billing period ${per}  |  ${basis}`);
+  ws.heights[3]=8;
+  section(ws,4,2,13,'①  THIS MONTH – BILLABLE MACHINE-DAYS');
+  card(ws,5,2,4,'USED BY UNITS  (machines we sent out)',S.E,`Prev month: ${num(S.F)}   |   Year to date: ${num(S.ytd)}`,C.OR,C.ORL,C.ORD);
+  card(ws,5,5,7,'USED BY US  (machines we received)',V.E,`Prev month: ${num(V.F)}   |   Year to date: ${num(V.ytd)}`,C.TE,C.TEL,C.TED);
+  card(ws,5,8,10,'NET MACHINE-DAYS  (units − us)',net,net>0?`Units used ${num(net)} more machine-days of ours`:(net<0?`We used ${num(-net)} more machine-days of theirs`:'Balanced'),C.NAVY,'E4EAF3',C.NAVY,'+#,##0;-#,##0;0');
+  const anyRate=R.groups.some(x=>x.rate>0);
+  card(ws,5,11,13,'ESTIMATED NET BILL  (receivable − payable)',S.amount-V.amount,anyRate?`Receivable ${num(S.amount,2)}  |  Payable ${num(V.amount,2)}`:'Enter rates in the tool to see amounts',C.MID,'EEF0F3',C.DK,'+#,##0.00;-#,##0.00;0');
+  ws.heights[9]=8;
+  section(ws,10,2,13,'②  RUNNING NOW – NOT YET RETURNED (bill continues every month until returned)');
+  card(ws,11,2,4,'RUNNING AT UNITS  (ours)',S.running,`Longest: ${num(S.longest)} days`,C.OR,C.ORL,C.ORD);
+  card(ws,11,5,7,'RUNNING WITH US  (theirs)',V.running,`Longest: ${num(V.longest)} days`,C.TE,C.TEL,C.TED);
+  card(ws,11,8,10,'RUNNING OVER 90 DAYS',S.over90+V.over90,`At units: ${S.over90}  |  With us: ${V.over90}`,'F29F4B','FEF3E4',C.ORD);
+  card(ws,11,11,13,'RUNNING OVER 1 YEAR',S.over365+V.over365,`At units: ${S.over365}  |  With us: ${V.over365}`,C.RED,C.REDL,C.RED);
+  ws.heights[15]=8;
+  section(ws,16,2,13,'③  BILL BASIS BY UNIT – report month');
+  const hd=['Unit','Running at month-end','Longest running (days)','Billable days this month','Billable days prev month','Change','Billable days year-to-date','Rate / day','Amount this month','Share of group'];
+  hd.forEach((h,i)=>ws.set(17,2+i,h,{b:1,sz:9,c:C.WH,bg:C.NAVY,h:'center',w:1,bd:'all'}));ws.heights[17]=36;
+  let r=18;
+  const blk=(dir,label,col,colL,T)=>{
+    ws.merge(r,2,r,11,label,{b:1,sz:9,c:C.WH,bg:col,ind:1});r++;
+    UNITS.forEach(u=>{const x=g(u,dir);
+      const ch=x.F===0?(x.E===0?'–':'new'):((x.E/x.F-1)*100).toFixed(0)+'%';
+      const vals=[u,x.running,x.longest,x.E,x.F,ch,x.ytd,x.rate||null,x.amount,T.E?x.E/T.E:0];
+      const nfs=[null,NF0,NF0,NF0,NF0,null,NF0,'#,##0.00',NF2,'0%'];
+      vals.forEach((v,i)=>{let bg=null,c=C.DK,b=i===0||i===3;
+        if(i===2&&x.longest>365){bg=C.RED;c=C.WH;b=1;}else if(i===2&&x.longest>90){bg=C.ORL;c=C.ORD;b=1;}
+        ws.set(r,2+i,v,{sz:10,b,c,bg,h:i===0?'left':'center',ind:i===0?1:0,bd:'all',nf:nfs[i]});});
+      ws.heights[r]=22;r++;});
+    const vals=['TOTAL',T.running,T.longest,T.E,T.F,T.F?((T.E/T.F-1)*100).toFixed(0)+'%':'–',T.ytd,null,T.amount,null];
+    vals.forEach((v,i)=>ws.set(r,2+i,v,{b:1,sz:10,c:C.NAVY,bg:colL,h:i===0?'left':'center',ind:i===0?1:0,bd:'tb',nf:[null,NF0,NF0,NF0,NF0,null,NF0,null,NF2,null][i]}));ws.heights[r]=22;r++;};
+  blk('SENT TO','SENT TO UNIT – units use our machines (receivable side)',C.OR,'FDDDB5',S);
+  blk('RECEIVED FROM','RECEIVED FROM UNIT – we use their machines (payable side)',C.TE,'A9E0D8',V);
+  ws.set(r,2,'NET (units − us)',{b:1,sz:10,c:C.WH,bg:C.NAVY,ind:1});
+  [[3,S.running-V.running],[5,S.E-V.E],[6,S.F-V.F],[8,S.ytd-V.ytd],[10,S.amount-V.amount]].forEach(([c,v])=>ws.set(r,c,v,{b:1,sz:10,c:C.WH,bg:C.NAVY,h:'center',nf:SG}));
+  ws.fill(r,2,r,11,{b:1,sz:10,c:C.WH,bg:C.NAVY});ws.heights[r]=22;r+=2;
+  section(ws,r,2,13,'④  LAST 12 MONTHS – BILLABLE MACHINE-DAYS');r++;
+  ['Month','Used by units','','Bar','Used by us','','Bar'].forEach(()=>{});
+  const tH=['Month','Used by units','▇ bar','Used by us','▇ bar'];
+  ws.set(r,2,'Month',{b:1,sz:9,c:C.WH,bg:C.NAVY,h:'center',bd:'all'});ws.set(r,3,'Used by units',{b:1,sz:9,c:C.WH,bg:C.OR,h:'center',bd:'all'});
+  ws.merge(r,4,r,7,'',{bg:C.OR,bd:'all'});ws.set(r,8,'Used by us',{b:1,sz:9,c:C.WH,bg:C.TE,h:'center',bd:'all'});ws.merge(r,9,r,12,'',{bg:C.TE,bd:'all'});r++;
+  const mxS=Math.max(1,...R.trend.map(t=>t.vals.reduce((a,v)=>a+v[0],0))),mxV=Math.max(1,...R.trend.map(t=>t.vals.reduce((a,v)=>a+v[1],0)));
+  R.trend.forEach(t=>{const a=t.vals.reduce((s,v)=>s+v[0],0),b=t.vals.reduce((s,v)=>s+v[1],0);
+    ws.set(r,2,t.label,{b:1,h:'center',bd:'all'});ws.set(r,3,a,{h:'center',bd:'all',nf:NF0});ws.merge(r,4,r,7,'█'.repeat(Math.round(a/mxS*24)),{c:C.OR,sz:9,bd:'all'});
+    ws.set(r,8,b,{h:'center',bd:'all',nf:NF0});ws.merge(r,9,r,12,'█'.repeat(Math.round(b/mxV*24)),{c:C.TE,sz:9,bd:'all'});ws.heights[r]=18;r++;});
+  r++;section(ws,r,2,13,'⑤  KEY OBSERVATIONS');r++;
+  const top=(dir)=>{const gs=R.groups.filter(x=>x.dir===dir).sort((a,b)=>b.E-a.E);return gs[0].E>0?gs[0]:null;};
+  const tS=top('SENT TO'),tV=top('RECEIVED FROM'),old=R.running[0];
+  [`•  ${monthLbl}: units used our machines for ${num(S.E)} billable machine-days and we used theirs for ${num(V.E)} (net ${net>=0?'+':''}${num(net)}).`,
+   `•  Highest user of our machines: ${tS?`${tS.unit} – ${num(tS.E)} machine-days (${Math.round(tS.E/S.E*100)}% of the total)`:'none this month'}.`,
+   `•  Unit we used the most: ${tV?`${tV.unit} – ${num(tV.E)} machine-days (${Math.round(tV.E/V.E*100)}% of the total)`:'none this month'}.`,
+   `•  ${S.over365+V.over365} machine(s) have been running over a year and keep adding machine-days every month until returned${old&&old.calTotal>365?` – oldest: ${old.mc} at/from ${old.unit} (${old.calTotal} days)`:''}.`,
+   anyRate?`•  Estimated net bill for the month: ${(S.amount-V.amount).toFixed(2)} (receivable less payable).`:'•  No rates entered yet – enter the rate per machine-day for each unit in the tool to convert machine-days into amounts.'
+  ].forEach((t,i)=>{ws.merge(r,2,r,13,t,{sz:10,bg:i%2?C.WH:C.GR,w:1,ind:1,bd:'bottom'});ws.heights[r]=24;r++;});
+  r++;section(ws,r,2,13,'⑥  LONGEST-RUNNING MACHINES (not yet returned) – follow up with the unit');r++;
+  ['#','Unit','Direction','Machine','Serial','Date out','Days running','Billable machine-days this month'].forEach((h,i)=>{
+    const spec=[[2,2],[3,3],[4,5],[6,8],[9,10],[11,11],[12,12],[13,13]][i];
+    if(spec[0]!==spec[1])ws.merge(r,spec[0],r,spec[1],h,{b:1,sz:9,c:C.WH,bg:C.NAVY,h:'center',w:1});else ws.set(r,spec[0],h,{b:1,sz:9,c:C.WH,bg:C.NAVY,h:'center',w:1});});ws.heights[r]=30;r++;
+  R.running.slice(0,10).forEach((x,i)=>{
+    const lv=x.calTotal>365?{bg:C.RED,c:C.WH,b:1}:(x.calTotal>90?{bg:C.ORL,c:C.ORD,b:1}:{});
+    ws.set(r,2,i+1,{h:'center',bd:'bottom'});ws.set(r,3,x.unit,{bd:'bottom',sz:9});ws.merge(r,4,r,5,x.dir,{bd:'bottom',h:'center',sz:9,b:1,c:x.dir==='SENT TO'?C.ORD:C.TED});
+    ws.merge(r,6,r,8,x.mc||'',{bd:'bottom',sz:9});ws.merge(r,9,r,10,x.sl==null?'':String(x.sl),{bd:'bottom',h:'center',sz:9});ws.set(r,11,serial(x.date),{h:'center',bd:'bottom',nf:'dd-mmm-yy',sz:9});
+    ws.set(r,12,x.calTotal,{h:'center',bd:'bottom',nf:'#,##0',...lv});ws.set(r,13,x.mdays,{h:'center',bd:'bottom',nf:NF0});ws.heights[r]=20;r++;});
+
+  /* ---------- Bill Summary ---------- */
+  ws=wb.add('Bill Summary',{tab:'2F5D9E',landscape:false,fitH:1});ws.widths[1]=3;[26,16,16,14,14,16,16].forEach((w,i)=>ws.widths[2+i]=w);
+  title(ws,8,'MONTHLY BILL SUMMARY – ALL UNITS',`${monthLbl}  |  billing period ${per}  |  Fridays & closed holidays not billed; Hindu festivals billed`,36);ws.heights[3]=8;
+  r=4;
+  const sblk=(label,col,colL,dir,T)=>{
+    ws.merge(r,2,r,8,label,{b:1,sz:11,c:C.WH,bg:col,ind:1});ws.heights[r]=24;r++;
+    ['Unit','Machines billed in month','Billable days (machine-days)','Rate / day','Amount','Running at month-end','Longest running (days)'].forEach((h,i)=>ws.set(r,2+i,h,{b:1,sz:9,bg:colL,h:'center',w:1,bd:'all'}));ws.heights[r]=36;r++;
+    UNITS.forEach(u=>{const x=g(u,dir);[u,x.billed,x.E,x.rate||null,x.amount,x.running,x.longest].forEach((v,i)=>ws.set(r,2+i,v,{b:i===0||i===2,h:i===0?'left':'center',ind:i===0?1:0,bd:'all',nf:[null,NF0,NF0,'#,##0.00',NF2,NF0,NF0][i]}));ws.heights[r]=22;r++;});
+    [ 'TOTAL',T.billed,T.E,null,T.amount,T.running,T.longest].forEach((v,i)=>ws.set(r,2+i,v,{b:1,c:C.NAVY,bg:colL,h:i===0?'left':'center',ind:i===0?1:0,bd:'tb',nf:[null,NF0,NF0,null,NF2,NF0,NF0][i]}));ws.heights[r]=24;r+=2;};
+  sblk('①  MACHINES WE SENT TO UNITS – units used our machines',C.OR,C.ORL,'SENT TO',S);
+  sblk('②  MACHINES WE RECEIVED FROM UNITS – we used their machines',C.TE,C.TEL,'RECEIVED FROM',V);
+  ws.merge(r,2,r,3,'NET (① − ②)',{b:1,sz:11,c:C.WH,bg:C.NAVY,ind:1});ws.set(r,4,S.E-V.E,{b:1,sz:11,c:C.WH,bg:C.NAVY,h:'center',nf:SG});ws.set(r,5,'',{bg:C.NAVY});ws.set(r,6,S.amount-V.amount,{b:1,sz:11,c:C.WH,bg:C.NAVY,h:'center',nf:'+#,##0.00;-#,##0.00;"–"'});ws.fill(r,7,r,8,{bg:C.NAVY});ws.heights[r]=26;r+=2;
+  ws.merge(r,2,r,8,anyRate?'Amount = billable days × rate per day for each unit and direction.':'Rates not entered yet – enter them in the tool; amounts then appear here and on every statement.',{i:1,sz:9,c:C.MID});r+=3;
+  ['Prepared by','Checked by','Approved by'].forEach((t,i)=>{ws.merge(r,2+i*2,r,3+i*2,t,{b:1,sz:9,c:C.MID,h:'center',bd:'top'});});
+
+  /* ---------- Bill Statements ---------- */
+  ws=wb.add('Bill Statements',{tab:C.OR,landscape:false,fitH:0});ws.widths[1]=3;[5,28,16,18,10,11,6,10,11,10,10,13].forEach((w,i)=>ws.widths[2+i]=w);
+  r=1;let first=true,nStm=0;
+  UNITS.forEach(u=>DIRS.forEach(d=>{
+    const lines=R.rows.filter(x=>x.unit===u&&x.dir===d&&x.mdays>0);if(!lines.length)return;
+    if(!first)ws.breaks.push(r-1);first=false;nStm++;
+    ws.merge(r,2,r,13,'MACHINE USAGE BILL',{b:1,sz:22,c:C.WH,bg:C.NAVY,v:'center',ind:1});ws.heights[r]=38;r++;
+    ws.merge(r,2,r,13,'Novel Hurricane Knit Garments Ltd.  ·  Arabi Fashion Limited   |   Inter-unit machine loan – monthly usage statement',{sz:10,c:'C9D6E8',bg:C.NAVY,ind:1});r+=2;
+    const bn=`MUB/${u.slice(0,4).toUpperCase()}/${R.RM?ymd(R.RM).y+'-'+p2(ymd(R.RM).m):''}/${d==='SENT TO'?'R':'P'}`;
+    const kv=(rr,c1,l,v)=>{ws.merge(rr,c1,rr,c1+1,l,{b:1,sz:9,c:C.MID,ind:1,bd:'bottom'});ws.merge(rr,c1+2,rr,c1+5,v,{b:1,sz:10,w:1,ind:1,bd:'bottom'});ws.heights[rr]=24;};
+    ws.merge(r,2,r,7,'BILL DETAILS',{b:1,sz:9,c:C.WH,bg:C.NAVY,ind:1});ws.merge(r,8,r,13,'BILLED PARTY',{b:1,sz:9,c:C.WH,bg:C.OR,ind:1});r++;
+    kv(r,2,'Bill no.',bn);kv(r,8,'Unit',u);r++;
+    kv(r,2,'Bill month',monthLbl);kv(r,8,'Type',d==='SENT TO'?`Machines we SENT to ${u} (used by ${u})`:`Machines we RECEIVED from ${u} (used by us)`);r++;
+    kv(r,2,'Billing period',per);kv(r,8,'Billing basis',basis);ws.heights[r]=34;r++;
+    kv(r,2,'Bill date',fmtDL(R.ASOF));kv(r,8,'Not yet returned','Machines still running are billed month by month until returned');ws.heights[r]=30;r+=2;
+    ['#','Machine','Serial no.','Challan','Date out','Returned','Qty','Calendar days','Not billed (Fri / holiday)','Billable days','Rate / day','Amount'].forEach((h,i)=>ws.set(r,2+i,h,{b:1,sz:9,c:C.WH,bg:C.OR,h:'center',w:1,bd:'all'}));ws.heights[r]=40;r++;
+    let tq=0,tc=0,tn=0,tb=0,ta=0;
+    lines.forEach((x,i)=>{const cd=x.cdays/x.qty,bd=x.mdays/x.qty;tq+=x.qty;tc+=x.cdays;tn+=x.cdays-x.mdays;tb+=x.mdays;ta+=x.amount;
+      const run=x.status!=='RETURNED';
+      [[i+1,'center',null],[x.mc||'','left',null],[x.sl==null?'':String(x.sl),'left',null],[x.ch==null?'':String(x.ch),'left',null],[serial(x.date),'center','dd-mmm-yy'],[run?'running':serial(x.rdate),'center',run?null:'dd-mmm-yy'],[x.qty,'center','#,##0'],[cd,'center','#,##0'],[cd-bd,'center','#,##0;-#,##0;"–"'],[bd,'center','#,##0'],[x.rate||null,'center','#,##0.00'],[x.amount||null,'center','#,##0.00']]
+        .forEach(([v,h,nf],j)=>ws.set(r,2+j,v,{sz:9,h,nf,bd:'bottom',b:j===9||(j===5&&run),c:(j===5&&run)?C.RED:C.DK,bg:i%2?'FAFBFC':null}));ws.heights[r]=19;r++;});
+    ws.merge(r,2,r,7,'TOTAL',{b:1,sz:10,c:C.WH,bg:C.NAVY,h:'right',ind:1});
+    [tq,tc,tn,tb,null,ta].forEach((v,i)=>ws.set(r,8+i,v,{b:1,sz:10,c:C.WH,bg:C.NAVY,h:'center',nf:i===5?'#,##0.00':'#,##0'}));ws.heights[r]=24;r+=2;
+    if(!R.groups.some(x=>x.rate>0))ws.merge(r,2,r,13,'Rate per day not entered yet – amount shows after Accounts provides the rate.',{i:1,sz:8,c:C.MID});r+=4;
+    ['Prepared by','Checked by','Approved by'].forEach((t,i)=>ws.merge(r,2+i*4+(i?1:0),r,5+i*4+(i?1:0),t,{b:1,sz:9,c:C.MID,h:'center',bd:'top'}));r+=2;
+  }));
+  if(!nStm)ws.set(1,2,'No machine used in this month.',{b:1,sz:12});
+
+  /* ---------- Monthly Matrix ---------- */
+  ws=wb.add('Monthly Matrix',{tab:C.TE,fitH:0});ws.freeze=[5,1];ws.widths[1]=12;for(let c=2;c<=14;c++)ws.widths[c]=12;ws.widths[15]=3;for(let c=16;c<=19;c++)ws.widths[c]=14;
+  ws.merge(1,1,1,14,'MONTH-WISE BILLABLE MACHINE-DAYS – ALL UNITS',{b:1,sz:18,c:C.WH,bg:C.NAVY,ind:1,v:'center'});ws.heights[1]=34;
+  ws.merge(2,1,2,14,`Billable days only (Fridays & closed holidays excluded) up to ${fmtDL(R.ASOF)}.`,{i:1,sz:9,c:'C9D6E8',bg:C.NAVY,ind:1});
+  ws.merge(4,2,4,7,'USED BY UNITS  (we sent)',{b:1,c:C.WH,bg:C.OR,h:'center'});ws.merge(4,8,4,13,'USED BY US  (we received)',{b:1,c:C.WH,bg:C.TE,h:'center'});ws.set(4,14,'',{bg:C.NAVY});
+  ['Month',...UNITS,'Total sent',...UNITS,'Total received','Net (sent − received)'].forEach((h,i)=>ws.set(5,1+i,h,{b:1,sz:9,c:C.WH,bg:i===0||i===13?C.NAVY:(i<=6?C.OR:C.TE),h:'center',w:1,bd:'all'}));ws.heights[5]=34;
+  let rr=6;const yt={};
+  R.months.forEach((ms,i)=>{if(ms>R.ASOF)return;
+    const a=UNITS.map(u=>R.grid[u+'|SENT TO'][i]),b=UNITS.map(u=>R.grid[u+'|RECEIVED FROM'][i]),ta=a.reduce((x,y)=>x+y,0),tb=b.reduce((x,y)=>x+y,0);
+    const hl=ms===R.RM;const y=ymd(ms).y;(yt[y]||(yt[y]=[0,0]));yt[y][0]+=ta;yt[y][1]+=tb;
+    [serial(ms),...a,ta,...b,tb,ta-tb].forEach((v,j)=>ws.set(rr,1+j,v,{sz:10,b:hl||j===0||j===6||j===12,bg:hl?'FFF2B3':((j===6||j===12)?'F7F8FA':null),h:'center',bd:'bottom',nf:j===0?'mmm-yyyy':(j===13?SG:NF0)}));rr++;});
+  ws.merge(4,16,4,19,'YEAR TOTALS (billable machine-days)',{b:1,sz:10,c:C.WH,bg:C.NAVY,h:'center'});
+  ['Year','Used by units','Used by us','Net'].forEach((h,i)=>ws.set(5,16+i,h,{b:1,sz:9,c:C.WH,bg:C.NAVY,h:'center',bd:'all'}));
+  Object.keys(yt).forEach((y,i)=>[+y,yt[y][0],yt[y][1],yt[y][0]-yt[y][1]].forEach((v,j)=>ws.set(6+i,16+j,v,{h:'center',bd:'all',b:j===0,nf:j===0?'0':(j===3?SG:NF0)})));
+
+  /* ---------- Running machines ---------- */
+  ws=wb.add('Running Machines',{tab:C.RED});ws.freeze=[4,0];[5,20,16,34,18,12,14,12,12,60].forEach((w,i)=>ws.widths[1+i]=w);
+  ws.merge(1,1,1,10,`MACHINES NOT YET RETURNED – as of ${fmtDL(R.ASOF)} (oldest first)`,{b:1,sz:18,c:C.WH,bg:C.NAVY,ind:1,v:'center'});ws.heights[1]=34;
+  ['#','Unit','Direction','Machine','Serial','Challan','Date out','Days running','Billable days to date','Check / remark'].forEach((h,i)=>ws.set(3,1+i,h,{b:1,sz:9,c:C.WH,bg:C.NAVY,h:'center',w:1,bd:'all'}));ws.heights[3]=32;
+  R.running.forEach((x,i)=>{const lv=x.calTotal>365?{bg:C.RED,c:C.WH,b:1}:(x.calTotal>90?{bg:C.ORL,c:C.ORD,b:1}:{});
+    [[i+1,'center'],[x.unit,'left'],[x.dir,'center'],[x.mc||'','left'],[x.sl==null?'':String(x.sl),'left'],[x.ch==null?'':String(x.ch),'left'],[serial(x.date),'center','dd-mmm-yy'],[x.calTotal,'center','#,##0',lv],[x.billTotal,'center','#,##0'],[x.flags.join(' '),'left']]
+      .forEach(([v,h,nf,o],j)=>ws.set(4+i,1+j,v,{sz:9,h,nf,bd:'bottom',...(o||{}),b:(o&&o.b)||j===2,c:(o&&o.c)||(j===2?(x.dir==='SENT TO'?C.ORD:C.TED):C.DK)}));});
+
+  /* ---------- Ledger ---------- */
+  ws=wb.add('Ledger',{tab:C.MID});ws.freeze=[4,5];[16,15,11,19,28,10,14,15,6,11,19,11,9,9,12,9,11,60,26,7].forEach((w,i)=>ws.widths[1+i]=w);
+  ws.merge(1,1,1,20,'MACHINE LEDGER – ALL UNITS (every line of your register)',{b:1,sz:16,c:C.WH,bg:C.NAVY,ind:1,v:'center'});ws.heights[1]=30;
+  ['Unit','Direction','Date out','Challan','Machine','Brand','Model','Serial','Qty','Return date','Return challan','Status','Calendar days','Billable days','Billable days in report month','Rate / day','Amount in report month','Check / remark','Source sheet','Src row'].forEach((h,i)=>ws.set(3,1+i,h,{b:1,sz:9,c:C.WH,bg:C.NAVY,h:'center',w:1,bd:'all'}));ws.heights[3]=42;
+  R.rows.forEach((x,i)=>{const rr=4+i;
+    [[x.unit],[x.dir,'center'],[serial(x.date),'center','dd-mmm-yy'],[x.ch==null?'':String(x.ch)],[x.mc||''],[x.br||''],[x.mo||''],[x.sl==null?'':String(x.sl)],[x.qty,'center'],[x.rdate==null?'':serial(x.rdate),'center','dd-mmm-yy'],[x.rch==null?'':String(x.rch)],[x.status,'center'],[x.calTotal,'center','#,##0'],[x.billTotal,'center','#,##0'],[x.mdays,'center','#,##0;-#,##0;"–"'],[x.rate||null,'center','#,##0.00'],[x.amount||null,'center','#,##0.00'],[x.flags.join(' ')],[x.sheet],[x.src,'center']]
+      .forEach(([v,h,nf],j)=>ws.set(rr,1+j,v,{sz:9,h:h||'left',nf,bd:'bottom',b:j===11&&x.status==='RUNNING',c:(j===11&&x.status==='RUNNING')?C.RED:C.DK,bg:x.flags.length&&j===17?'FFF6D6':null}));});
+
+  /* ---------- Notes ---------- */
+  ws=wb.add('Notes & Checks',{tab:C.MID});ws.widths[1]=3;[20,18,26,10,14,100].forEach((w,i)=>ws.widths[2+i]=w);ws.widths[8]=3;
+  ws.merge(1,2,1,7,'NOTES, METHOD & DATA CHECKS',{b:1,sz:18,c:C.WH,bg:C.NAVY,ind:1,v:'center'});ws.heights[1]=34;r=3;
+  const hd2=t=>{ws.merge(r,2,r,7,t,{b:1,sz:10,c:C.WH,bg:C.NAVY,ind:1});r++;};
+  const ln=t=>{ws.merge(r,2,r,7,t,{sz:9,w:1,ind:1,v:'top'});ws.heights[r]=15*Math.max(1,Math.ceil(t.length/170));r++;};
+  hd2('HOW THE BILL BASIS WORKS');
+  ['Machine-day = one machine used for one day. Billable days = calendar days from delivery to return, minus every Friday and every factory-closed holiday on the holiday list.',
+   'SENT TO a unit: the unit uses our machine from delivery until its return challan (receivable side). RECEIVED FROM a unit: we use their machine from receipt until we return it (payable side).',
+   'Machines not yet returned are counted up to the month-end of the report month – the bill continues month after month until return. Each day is counted once only across months.',
+   `Delivery day is counted. Return day is ${R.inc?'counted':'NOT counted'} (setting). Hindu festivals are marked "factory open" so those days ARE billed.`,
+   'Rates are not in the register – enter them in the tool. Until then only machine-days are shown.'].forEach(ln);
+  r++;hd2('SETTINGS USED');
+  const yrs=[...new Set(R.holEff.map(h=>ymd(h.dn).y))].sort().filter(y=>y>=ymd(R.FM).y);
+  yrs.forEach(y=>{const hs=R.holEff.filter(h=>ymd(h.dn).y===y),au=hs.some(h=>h.src==='auto'),sh=hs.some(h=>h.src==='sheet');
+    ln(`${y} (${au?'AUTO-GENERATED – fixed national days + ESTIMATED Eid/Ashura/Miladunnabi/Shab-e-Qadr; confirm with the official list':(sh?'from HOLIDAYS sheet in your register':'entered by you')}): closed/not billed: `+(hs.filter(h=>h.closed==1).map(h=>fmtD(h.dn)+(h.kind==='est'?'*':'')).join(', ')||'none (Fridays only)')+'  |  open/billed: '+(hs.filter(h=>h.closed!=1).map(h=>fmtD(h.dn)).join(', ')||'none'));});
+  if(R.autoYears.length)ln('* = estimated date. Estimates can be 1 day off and exclude extra vacation days announced by the government.');
+  if(!yrs.includes(ymd(R.RM).y))ln('WARNING: no holidays at all for '+ymd(R.RM).y+' – only Fridays were skipped in this report.');
+  ln('Rates: '+(R.groups.filter(x=>x.rate>0).map(x=>`${x.unit} ${x.dir} = ${x.rate}`).join('; ')||'not entered'));
+  R.corrNotes.forEach(t=>ln('Correction – '+t));
+  r++;hd2('IMPORT LOG – lines read from each sheet (compare with your register)');
+  ['Sheet','Unit','Direction','Lines read','Qty read','Notes / skipped rows'].forEach((h,i)=>ws.set(r,2+i,h,{b:1,sz:9,bg:C.GR,bd:'all'}));r++;
+  R.log.forEach(l=>{const sk=l.skipped.map(s=>`row ${s[0]}: ${s[1]}`).join('; ');[l.sheet,l.unit,l.dir,l.lines,l.qty,(l.note+' '+sk).trim()].forEach((v,i)=>ws.set(r,2+i,v,{sz:9,w:1,v:'top',bd:'all',c:(sk||/NOT read/.test(l.note))?C.RED:C.DK}));r++;});
+  ws.set(r,2,'TOTAL',{b:1,sz:9});ws.set(r,5,R.log.reduce((a,l)=>a+l.lines,0),{b:1,sz:9});ws.set(r,6,R.log.reduce((a,l)=>a+l.qty,0),{b:1,sz:9});r+=2;
+  hd2('REGISTER LINES FLAGGED FOR REVIEW (all still counted)');
+  ['Unit','Direction','Machine','Src row','Serial','Note'].forEach((h,i)=>ws.set(r,2+i,h,{b:1,sz:9,bg:C.GR,bd:'all'}));r++;
+  R.rows.filter(x=>x.flags.length).forEach(x=>{[x.unit,x.dir,x.mc||'',x.src,x.sl==null?'':String(x.sl),x.flags.join(' ')].forEach((v,i)=>ws.set(r,2+i,v,{sz:9,w:1,v:'top',bd:'all'}));ws.heights[r]=26;r++;});
+  return wb.build();
+}
+/* ================= UI ================= */
+const $=id=>document.getElementById(id);
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+let REG=null,R=null,FILENAME='';
+const state={hol:LS.get('hol',null)||defaultHolidays(),rates:LS.get('rates',{}),corr:LS.get('corr',null)||defaultCorr()};
+const dnToInput=n=>{const t=ymd(n);return `${t.y}-${p2(t.m)}-${p2(t.d)}`;};
+const inputToDn=s=>{const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?DN(+m[1],+m[2],+m[3]):null;};
+function saveState(){LS.set('hol',state.hol);LS.set('rates',state.rates);LS.set('corr',state.corr);}
+function drawRates(){
+  let h='<tr><th class="l">Unit</th><th>Rate / machine-day when we SENT machines to the unit</th><th>Rate / machine-day when we RECEIVED machines from the unit</th></tr>';
+  UNITS.forEach((u,i)=>{h+=`<tr><td class="l"><b>${u}</b></td>`+DIRS.map(d=>`<td><input type="number" step="any" min="0" class="in" data-k="${u}|${d}" value="${state.rates[u+'|'+d]??''}" style="width:130px"></td>`).join('')+'</tr>';});
+  $('rates').innerHTML=h;
+  $('rates').querySelectorAll('input').forEach(el=>el.oninput=()=>{const v=parseFloat(el.value);if(isNaN(v))delete state.rates[el.dataset.k];else state.rates[el.dataset.k]=v;saveState();});
+}
+function drawHols(){
+  state.hol.sort((a,b)=>a.dn-b.dn);
+  let h='<tr><th>Date</th><th class="l">Holiday</th><th>Factory</th><th></th></tr>';
+  state.hol.forEach((x,i)=>{h+=`<tr><td><input type="date" class="in" data-i="${i}" data-f="dn" value="${dnToInput(x.dn)}"></td><td class="l"><input type="text" data-i="${i}" data-f="name" value="${x.name.replace(/"/g,'&quot;')}" style="width:100%"></td><td><select data-i="${i}" data-f="closed"><option value="1" ${x.closed==1?'selected':''}>Closed – no bill</option><option value="0" ${x.closed==1?'':'selected'}>Open – billed</option></select></td><td><button class="ghost" data-del="${i}">✕</button></td></tr>`;});
+  $('hols').innerHTML=h;
+  $('hols').querySelectorAll('[data-f]').forEach(el=>el.onchange=()=>{const x=state.hol[+el.dataset.i],f=el.dataset.f;if(f==='dn'){const n=inputToDn(el.value);if(n!=null)x.dn=n;}else if(f==='closed')x.closed=+el.value;else x.name=el.value;saveState();});
+  $('hols').querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{state.hol.splice(+el.dataset.del,1);saveState();drawHols();});
+}
+function drawCorr(){
+  let h='<tr><th class="l">Sheet name</th><th>Row</th><th>Field</th><th>New date</th><th class="l">Note</th><th></th></tr>';
+  state.corr.forEach((x,i)=>{h+=`<tr><td class="l"><input type="text" data-i="${i}" data-f="sheet" value="${x.sheet}" style="width:200px"></td><td><input type="number" data-i="${i}" data-f="row" value="${x.row}" style="width:70px"></td><td><select data-i="${i}" data-f="field"><option value="return_date" ${x.field==='return_date'?'selected':''}>Return date</option><option value="date_out" ${x.field==='date_out'?'selected':''}>Date out</option></select></td><td><input type="date" data-i="${i}" data-f="dn" value="${dnToInput(x.dn)}"></td><td class="l"><input type="text" data-i="${i}" data-f="note" value="${(x.note||'').replace(/"/g,'&quot;')}" style="width:100%"></td><td><button class="ghost" data-del="${i}">✕</button></td></tr>`;});
+  $('corrs').innerHTML=h;
+  $('corrs').querySelectorAll('[data-f]').forEach(el=>el.onchange=()=>{const x=state.corr[+el.dataset.i],f=el.dataset.f;if(f==='dn'){const n=inputToDn(el.value);if(n!=null)x.dn=n;}else if(f==='row')x.row=+el.value;else x[f]=el.value;saveState();});
+  $('corrs').querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{state.corr.splice(+el.dataset.del,1);saveState();drawCorr();});
+}
+$('addhol').onclick=()=>{state.hol.push({dn:DN(new Date().getUTCFullYear(),1,1),name:'New holiday',closed:1});saveState();drawHols();};
+$('reshol').onclick=()=>{state.hol=defaultHolidays();saveState();drawHols();};
+$('addcorr').onclick=()=>{state.corr.push({sheet:'',row:0,field:'return_date',dn:DN(2026,1,1),note:''});saveState();drawCorr();};
+(()=>{const t=new Date(),d=t.getDate()>=25?t:new Date(t.getFullYear(),t.getMonth(),0);$('month').value=`${d.getFullYear()}-${p2(d.getMonth()+1)}`;})();
+$('automode').value=LS.get('automode','recent');$('automode').onchange=()=>LS.set('automode',$('automode').value);
+$('inc').value=LS.get('inc','1');$('inc').onchange=()=>LS.set('inc',$('inc').value);
+drawRates();drawHols();drawCorr();
+
+/* ---- file loading ---- */
+const drop=$('drop'),fileEl=$('file');
+drop.onclick=()=>fileEl.click();
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over');};drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0]);};
+fileEl.onchange=()=>{if(fileEl.files[0])loadFile(fileEl.files[0]);};
+async function loadFile(f){
+  $('status').innerHTML='Reading '+f.name+' …';
+  try{
+    const sheets=await readXlsx(await f.arrayBuffer());REG=loadRegister(sheets);FILENAME=f.name;
+    const n=REG.rows.length;
+    if(!n){$('status').innerHTML='<div class="err">No machine lines found – check the sheet names / heading rows (DATE, QTY).</div>';return;}
+    $('status').innerHTML=`✔ <b>${f.name}</b> – ${n} machine lines read from ${REG.log.filter(l=>l.lines>0).length} sheets. Choose the month and press <b>Make report</b>.`;
+    make();
+  }catch(e){$('status').innerHTML='<div class="err">Could not read this file: '+e.message+'</div>';console.error(e);}
+}
+$('go').onclick=()=>{if(!REG){$('status').innerHTML='<div class="err">First choose your Excel file.</div>';return;}make();};
+
+function make(){
+  const m=$('month').value.match(/^(\d{4})-(\d{2})$/);if(!m){$('status').innerHTML='<div class="err">Pick the report month.</div>';return;}
+  const cfg={month:{y:+m[1],m:+m[2]},inc:+$('inc').value,autoMode:$('automode').value,hol:state.hol.map(h=>({...h})),rates:{...state.rates},corr:state.corr.filter(c=>c.sheet&&c.row).map(c=>({...c}))};
+  R=compute(REG,cfg);render();
+  const ay=R.autoYears;
+  $('warnbox').innerHTML=ay.length?`<div class="warn"><b>ℹ Holidays for ${ay.join(', ')} were generated AUTOMATICALLY</b> (no dates entered for ${ay.length>1?'those years':'that year'}): fixed national days + <b>ESTIMATED</b> Eid-ul-Fitr, Eid-ul-Azha (6-day vacation), Ashura, Eid-e-Miladunnabi and Shab-e-Qadr. Estimates can be 1 day off, and extra vacation days announced by the government are not included. When the official list is announced, add it under “Holidays” above or in a sheet named <b>HOLIDAYS</b> in your register – it replaces the estimate automatically. Hindu festivals need no entry (factory open = billed). See the “Checks” tab for the exact dates used.</div>`:'';
+  $('out').classList.remove('hide');$('xl').classList.remove('hide');$('prt').classList.remove('hide');
+}
+
+/* ---- charts ---- */
+function stackedSvg(R,di){
+  const W=560,H=250,pl=44,pb=34,pt=10,pr=10,n=R.trend.length;
+  const totals=R.trend.map(t=>t.vals.reduce((a,v)=>a+v[di],0)),mx=Math.max(10,...totals);
+  const nice=(()=>{const p=Math.pow(10,Math.floor(Math.log10(mx)));return Math.ceil(mx/p*2)/2*p;})();
+  const bw=(W-pl-pr)/n,ch=H-pt-pb;let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+  for(let i=0;i<=4;i++){const y=pt+ch-ch*i/4;s+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="currentColor" opacity=".12"/><text x="${pl-6}" y="${y+4}" font-size="10" text-anchor="end" fill="currentColor" opacity=".7">${Math.round(nice*i/4).toLocaleString()}</text>`;}
+  R.trend.forEach((t,i)=>{let y=pt+ch;t.vals.forEach((v,ui)=>{const h=v[di]/nice*ch;if(h>0){y-=h;s+=`<rect x="${pl+i*bw+bw*.15}" y="${y}" width="${bw*.7}" height="${h}" fill="${UCOL[ui]}"><title>${t.label} · ${UNITS[ui]}: ${v[di]}</title></rect>`;}});
+    s+=`<text x="${pl+i*bw+bw/2}" y="${H-pb+14}" font-size="9.5" text-anchor="middle" fill="currentColor" opacity=".8">${t.label}</text>`;
+    if(totals[i]>0)s+=`<text x="${pl+i*bw+bw/2}" y="${y-3}" font-size="9" text-anchor="middle" fill="currentColor">${totals[i]}</text>`;});
+  return s+'</svg>';
+}
+const legend=()=>'<div class="legend">'+UNITS.map((u,i)=>`<span><i style="background:${UCOL[i]}"></i>${u}</span>`).join('')+'</div>';
+
+/* ---- render ---- */
+function cardH(cls,label,val,sub,nf){return `<div class="card ${cls}"><div class="lb">${label}</div><div class="vl">${nf?nf(val):num(val)}</div><div class="sb">${sub}</div></div>`;}
+const sgn=v=>(v>0?'+':'')+num(v);
+function render(){
+  const S=R.sent,V=R.recv,net=S.E-V.E,anyRate=R.groups.some(x=>x.rate>0);
+  const tabs=[['dash','Dashboard'],['sum','Bill Summary'],['stm','Bill Statement'],['mat','Monthly Matrix'],['run','Running machines'],['chk','Checks & import log']];
+  $('tabs').innerHTML=tabs.map(([k,t],i)=>`<button data-t="${k}" class="${i?'':'on'}">${t}</button>`).join('');
+  $('panes').innerHTML=tabs.map(([k],i)=>`<div class="tabpane ${i?'hide':''}" id="p-${k}"></div>`).join('');
+  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('tabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('hide',p.id!=='p-'+b.dataset.t));});
+  const per=`${fmtDL(R.RM)} to ${fmtDL(R.ASOF)}`;
+  /* dashboard */
+  const g=(u,d)=>R.groups.find(x=>x.unit===u&&x.dir===d);
+  const tbl=(dir,label,band,tot,T)=>{
+    let h=`<tr class="${band}"><td colspan="10">${label}</td></tr>`;
+    UNITS.forEach(u=>{const x=g(u,dir),ch=x.F===0?(x.E===0?'–':'new'):((x.E/x.F-1)*100).toFixed(0)+'%';
+      h+=`<tr><td class="l"><b>${u}</b></td><td>${num(x.running)}</td><td class="${x.longest>365?'r365':x.longest>90?'r90':''}">${num(x.longest)}</td><td><b>${num(x.E)}</b></td><td>${num(x.F)}</td><td>${ch}</td><td>${num(x.ytd)}</td><td>${x.rate?num(x.rate,2):'–'}</td><td>${x.amount?num(x.amount,2):'–'}</td><td>${T.E?Math.round(x.E/T.E*100)+'%':'0%'}</td></tr>`;});
+    h+=`<tr class="tot ${tot}"><td class="l">TOTAL</td><td>${num(T.running)}</td><td>${num(T.longest)}</td><td>${num(T.E)}</td><td>${num(T.F)}</td><td>${T.F?((T.E/T.F-1)*100).toFixed(0)+'%':'–'}</td><td>${num(T.ytd)}</td><td></td><td>${T.amount?num(T.amount,2):'–'}</td><td></td></tr>`;return h;};
+  const top=dir=>{const gs=R.groups.filter(x=>x.dir===dir).sort((a,b)=>b.E-a.E);return gs[0].E>0?gs[0]:null;};
+  const tS=top('SENT TO'),tV=top('RECEIVED FROM'),old=R.running[0];
+  const obs=[`${fmtML(R.RM)}: units used our machines for <b>${num(S.E)}</b> billable machine-days and we used theirs for <b>${num(V.E)}</b> (net ${sgn(net)}).`,
+   `Highest user of our machines: ${tS?`<b>${tS.unit}</b> – ${num(tS.E)} machine-days (${Math.round(tS.E/S.E*100)}% of the total)`:'none this month'}.`,
+   `Unit we used the most: ${tV?`<b>${tV.unit}</b> – ${num(tV.E)} machine-days (${Math.round(tV.E/V.E*100)}% of the total)`:'none this month'}.`,
+   `<b>${S.over365+V.over365}</b> machine(s) have been running over a year and keep adding machine-days every month until returned${old&&old.calTotal>365?` – oldest: <b>${old.mc}</b> at/from ${old.unit} (${old.calTotal} days)`:''}.`,
+   anyRate?`Estimated net bill for the month: <b>${num(S.amount-V.amount,2)}</b> (receivable less payable).`:'No rates entered yet – open “Rate per machine-day” above and type the rate for each unit to convert machine-days into amounts.'];
+  $('p-dash').innerHTML=
+   `<div class="sec">① THIS MONTH – BILLABLE MACHINE-DAYS · ${fmtML(R.RM)} · billing period ${per}</div><div class="cards">`+
+   cardH('c-or','USED BY UNITS (machines we sent out)',S.E,`Prev month: ${num(S.F)} | Year to date: ${num(S.ytd)}`)+cardH('c-te','USED BY US (machines we received)',V.E,`Prev month: ${num(V.F)} | Year to date: ${num(V.ytd)}`)+
+   cardH('c-na','NET MACHINE-DAYS (units − us)',net,net>0?`Units used ${num(net)} more machine-days of ours`:net<0?`We used ${num(-net)} more machine-days of theirs`:'Balanced',sgn)+
+   cardH('c-gy','ESTIMATED NET BILL',S.amount-V.amount,anyRate?`Receivable ${num(S.amount,2)} | Payable ${num(V.amount,2)}`:'Enter rates above to see amounts',v=>(v>0?'+':'')+num(v,2))+`</div>`+
+   `<div class="sec">② RUNNING NOW – NOT YET RETURNED (bill continues every month until returned)</div><div class="cards">`+
+   cardH('c-or','RUNNING AT UNITS (ours)',S.running,`Longest: ${num(S.longest)} days`)+cardH('c-te','RUNNING WITH US (theirs)',V.running,`Longest: ${num(V.longest)} days`)+
+   cardH('c-lo','RUNNING OVER 90 DAYS',S.over90+V.over90,`At units: ${S.over90} | With us: ${V.over90}`)+cardH('c-rd','RUNNING OVER 1 YEAR',S.over365+V.over365,`At units: ${S.over365} | With us: ${V.over365}`)+`</div>`+
+   `<div class="sec">③ BILL BASIS BY UNIT</div><div class="scroll"><table><tr><th class="l">Unit</th><th>Running at month-end</th><th>Longest running (days)</th><th>Billable days this month</th><th>Billable days prev month</th><th>Change</th><th>Billable days year-to-date</th><th>Rate / day</th><th>Amount this month</th><th>Share of group</th></tr>`+
+   tbl('SENT TO','SENT TO UNIT – units use our machines (receivable side)','band-or','tot-or',S)+tbl('RECEIVED FROM','RECEIVED FROM UNIT – we use their machines (payable side)','band-te','tot-te',V)+
+   `<tr class="net"><td class="l">NET (units − us)</td><td>${sgn(S.running-V.running)}</td><td></td><td>${sgn(S.E-V.E)}</td><td>${sgn(S.F-V.F)}</td><td></td><td>${sgn(S.ytd-V.ytd)}</td><td></td><td>${anyRate?sgn(S.amount-V.amount):'–'}</td><td></td></tr></table></div>`+
+   `<div class="sec">④ LAST 12 MONTHS – BILLABLE MACHINE-DAYS BY UNIT</div><div class="charts"><div class="chart"><h3>Units using OUR machines</h3>${stackedSvg(R,0)}${legend()}</div><div class="chart"><h3>WE using units' machines</h3>${stackedSvg(R,1)}${legend()}</div></div>`+
+   `<div class="sec">⑤ KEY OBSERVATIONS</div>${obs.map(o=>`<div class="obs">• ${o}</div>`).join('')}`+
+   `<div class="sec">⑥ LONGEST-RUNNING MACHINES (not yet returned) – follow up with the unit</div><div class="scroll"><table><tr><th>#</th><th class="l">Unit</th><th>Direction</th><th class="l">Machine</th><th>Serial</th><th>Date out</th><th>Days running</th><th>Billable machine-days this month</th></tr>`+
+   R.running.slice(0,10).map((x,i)=>`<tr><td>${i+1}</td><td class="l">${x.unit}</td><td><b style="color:${x.dir==='SENT TO'?'var(--ord)':'var(--ted)'}">${x.dir}</b></td><td class="l">${x.mc||''}</td><td>${x.sl??''}</td><td>${fmtD(x.date)}</td><td class="${x.calTotal>365?'r365':x.calTotal>90?'r90':''}">${num(x.calTotal)}</td><td>${num(x.mdays)}</td></tr>`).join('')+`</table></div>`;
+  /* summary */
+  const sblk=(label,band,tot,dir,T)=>`<div class="sec" style="background:${band}">${label}</div><div class="scroll"><table><tr><th class="l">Unit</th><th>Machines billed in month</th><th>Billable days (machine-days)</th><th>Rate / day</th><th>Amount</th><th>Running at month-end</th><th>Longest running (days)</th></tr>`+
+    UNITS.map(u=>{const x=g(u,dir);return `<tr><td class="l"><b>${u}</b></td><td>${num(x.billed)}</td><td><b>${num(x.E)}</b></td><td>${x.rate?num(x.rate,2):'–'}</td><td>${x.amount?num(x.amount,2):'–'}</td><td>${num(x.running)}</td><td>${num(x.longest)}</td></tr>`;}).join('')+
+    `<tr class="tot ${tot}"><td class="l">TOTAL</td><td>${num(T.billed)}</td><td>${num(T.E)}</td><td></td><td>${T.amount?num(T.amount,2):'–'}</td><td>${num(T.running)}</td><td>${num(T.longest)}</td></tr></table></div>`;
+  $('p-sum').innerHTML=`<div class="bill"><div class="hd"><h2>MONTHLY BILL SUMMARY – ALL UNITS</h2><p>${fmtML(R.RM)} | billing period ${per} | Fridays &amp; closed holidays not billed; Hindu festivals billed (factory open)</p></div><div style="padding:6px 14px 14px">`+
+    sblk('① MACHINES WE SENT TO UNITS – units used our machines','var(--or)','tot-or','SENT TO',S)+sblk('② MACHINES WE RECEIVED FROM UNITS – we used their machines','var(--te)','tot-te','RECEIVED FROM',V)+
+    `<table style="margin-top:12px"><tr class="net"><td class="l">NET (① − ②)</td><td>${sgn(S.E-V.E)} machine-days</td><td>${anyRate?sgn(S.amount-V.amount):'amount: enter rates'}</td></tr></table>`+
+    `<div class="sig"><div>Prepared by</div><div>Checked by</div><div>Approved by</div></div></div></div>`;
+  /* statement */
+  const sel=`<div class="row noprint" style="margin-bottom:12px"><div><label>Unit</label><select id="su" class="in">${UNITS.map(u=>`<option>${u}</option>`).join('')}</select></div><div><label>Direction</label><select id="sd" class="in"><option>SENT TO</option><option>RECEIVED FROM</option></select></div><div class="muted" style="align-self:center">Pick unit &amp; direction, then print (🖨 button above).</div></div><div id="stmBody"></div>`;
+  $('p-stm').innerHTML=sel;
+  const firstWith=R.groups.find(x=>x.billed>0)||R.groups[0];$('su').value=firstWith.unit;$('sd').value=firstWith.dir;
+  const drawStm=()=>{
+    const u=$('su').value,d=$('sd').value,lines=R.rows.filter(x=>x.unit===u&&x.dir===d&&x.mdays>0);
+    let tq=0,tc=0,tn=0,tb=0,ta=0;
+    const body=lines.map((x,i)=>{const cd=x.cdays/x.qty,bd=x.mdays/x.qty;tq+=x.qty;tc+=x.cdays;tn+=x.cdays-x.mdays;tb+=x.mdays;ta+=x.amount;const run=x.status!=='RETURNED';
+      return `<tr><td>${i+1}</td><td class="l">${x.mc||''}</td><td class="l">${x.sl??''}</td><td class="l">${x.ch??''}</td><td>${fmtD(x.date)}</td><td ${run?'style="color:var(--red);font-weight:700"':''}>${run?'running':fmtD(x.rdate)}</td><td>${x.qty}</td><td>${num(cd)}</td><td>${num(cd-bd)}</td><td><b>${num(bd)}</b></td><td>${x.rate?num(x.rate,2):'–'}</td><td>${x.amount?num(x.amount,2):'–'}</td></tr>`;}).join('');
+    const ym=ymd(R.RM),bn=`MUB/${u.slice(0,4).toUpperCase()}/${ym.y}-${p2(ym.m)}/${d==='SENT TO'?'R':'P'}`;
+    $('stmBody').innerHTML=`<div class="bill"><div class="hd"><h2>MACHINE USAGE BILL</h2><p>Novel Hurricane Knit Garments Ltd. · Arabi Fashion Limited | Inter-unit machine loan – monthly usage statement</p></div>
+     <div class="kv"><div><h4 style="background:var(--navy)">BILL DETAILS</h4><div class="rw"><span>Bill no.</span>${bn}</div><div class="rw"><span>Bill month</span>${fmtML(R.RM)}</div><div class="rw"><span>Billing period</span>${per}</div><div class="rw"><span>Bill date</span>${fmtDL(R.ASOF)}</div></div>
+     <div><h4 style="background:var(--or)">BILLED PARTY</h4><div class="rw"><span>Unit</span>${u}</div><div class="rw"><span>Type</span>${d==='SENT TO'?`Machines we SENT to ${u} (used by ${u})`:`Machines we RECEIVED from ${u} (used by us)`}</div><div class="rw"><span>Billing basis</span>Calendar days less Fridays &amp; closed holidays</div><div class="rw"><span>Not yet returned</span>Billed month by month until returned</div></div></div>
+     <div style="padding:12px"><div class="scroll"><table><tr style="--x:0"><th style="background:var(--or)">#</th><th class="l" style="background:var(--or)">Machine</th><th class="l" style="background:var(--or)">Serial no.</th><th class="l" style="background:var(--or)">Challan</th><th style="background:var(--or)">Date out</th><th style="background:var(--or)">Returned</th><th style="background:var(--or)">Qty</th><th style="background:var(--or)">Calendar days</th><th style="background:var(--or)">Not billed (Fri / holiday)</th><th style="background:var(--or)">Billable days</th><th style="background:var(--or)">Rate / day</th><th style="background:var(--or)">Amount</th></tr>${body||'<tr><td colspan="12">No machine used in this month.</td></tr>'}
+     <tr class="net"><td colspan="6" style="text-align:right">TOTAL</td><td>${tq}</td><td>${num(tc)}</td><td>${num(tn)}</td><td>${num(tb)}</td><td></td><td>${ta?num(ta,2):'–'}</td></tr></table></div>
+     ${anyRate?'':'<p class="muted">Rate per day not entered yet – amount shows after Accounts provides the rate.</p>'}<div class="sig"><div>Prepared by</div><div>Checked by</div><div>Approved by</div></div></div></div>`;};
+  $('su').onchange=drawStm;$('sd').onchange=drawStm;drawStm();
+  /* matrix */
+  const ms=R.months.filter(m=>m<=R.ASOF),yt={};
+  let mh=`<tr><th rowspan="2">Month</th><th colspan="6" style="background:var(--or)">USED BY UNITS (we sent)</th><th colspan="6" style="background:var(--te)">USED BY US (we received)</th><th rowspan="2">Net (sent − received)</th></tr><tr>`+UNITS.map(u=>`<th style="background:var(--or)">${u}</th>`).join('')+`<th style="background:var(--or)">Total sent</th>`+UNITS.map(u=>`<th style="background:var(--te)">${u}</th>`).join('')+`<th style="background:var(--te)">Total received</th></tr>`;
+  const mi=m=>R.months.indexOf(m);
+  [...ms].reverse().forEach(m=>{const i=mi(m),a=UNITS.map(u=>R.grid[u+'|SENT TO'][i]),b=UNITS.map(u=>R.grid[u+'|RECEIVED FROM'][i]),ta=a.reduce((x,y)=>x+y,0),tb=b.reduce((x,y)=>x+y,0);
+    const y=ymd(m).y;(yt[y]||(yt[y]=[0,0]))[0]+=ta;yt[y][1]+=tb;
+    mh+=`<tr ${m===R.RM?'style="background:#FFF2B3;color:#1F3A5F;font-weight:700"':''}><td><b>${fmtM(m)}</b></td>${a.map(v=>`<td>${num(v)}</td>`).join('')}<td><b>${num(ta)}</b></td>${b.map(v=>`<td>${num(v)}</td>`).join('')}<td><b>${num(tb)}</b></td><td>${sgn(ta-tb)}</td></tr>`;});
+  $('p-mat').innerHTML=`<div class="sec">YEAR TOTALS (billable machine-days)</div><table style="max-width:560px"><tr><th>Year</th><th>Used by units</th><th>Used by us</th><th>Net</th></tr>${Object.keys(yt).map(y=>`<tr><td><b>${y}</b></td><td>${num(yt[y][0])}</td><td>${num(yt[y][1])}</td><td>${sgn(yt[y][0]-yt[y][1])}</td></tr>`).join('')}</table><div class="sec">MONTH-WISE (latest first)</div><div class="scroll"><table>${mh}</table></div>`;
+  /* running */
+  $('p-run').innerHTML=`<div class="sec">MACHINES NOT YET RETURNED – as of ${fmtDL(R.ASOF)} (oldest first)</div><div class="scroll"><table><tr><th>#</th><th class="l">Unit</th><th>Direction</th><th class="l">Machine</th><th>Serial</th><th>Challan</th><th>Date out</th><th>Days running</th><th>Billable days to date</th><th class="l">Check / remark</th></tr>`+
+    R.running.map((x,i)=>`<tr><td>${i+1}</td><td class="l">${x.unit}</td><td><b style="color:${x.dir==='SENT TO'?'var(--ord)':'var(--ted)'}">${x.dir}</b></td><td class="l">${x.mc||''}</td><td>${x.sl??''}</td><td>${x.ch??''}</td><td>${fmtD(x.date)}</td><td class="${x.calTotal>365?'r365':x.calTotal>90?'r90':''}">${num(x.calTotal)}</td><td>${num(x.billTotal)}</td><td class="l">${x.flags.join(' ')}</td></tr>`).join('')+`</table></div>`;
+  /* checks */
+  const flagged=R.rows.filter(x=>x.flags.length);
+  const yrsAll=[...new Set(R.holEff.map(h=>ymd(h.dn).y))].sort();
+  const hsrc=y=>{const hs=R.holEff.filter(h=>ymd(h.dn).y===y);const k=new Set(hs.map(h=>h.src));return k.has('auto')?'AUTO-GENERATED (fixed + estimated Eid etc.)':(k.has('sheet')?'From HOLIDAYS sheet in your register':'Entered by you');};
+  const holHtml=`<div class="sec">HOLIDAYS USED (closed = not billed · open = billed) – year by year</div><div class="scroll"><table><tr><th>Year</th><th class="l">Source</th><th class="l">Closed holidays (not billed)</th><th class="l">Open (billed)</th></tr>`+yrsAll.filter(y=>y>=ymd(R.FM).y).map(y=>{const hs=R.holEff.filter(h=>ymd(h.dn).y===y);return `<tr><td><b>${y}</b></td><td class="l" style="${hsrc(y).startsWith('AUTO')?'color:var(--ord);font-weight:700':''}">${hsrc(y)}</td><td class="l">${hs.filter(h=>h.closed==1).map(h=>fmtD(h.dn)+(h.src==='auto'&&h.kind==='est'?'*':'')).join(', ')||'–'}</td><td class="l">${hs.filter(h=>h.closed!=1).map(h=>fmtD(h.dn)).join(', ')||'–'}</td></tr>`;}).join('')+`</table></div><div class="muted">* estimated date</div>`;
+  $('p-chk').innerHTML=holHtml+`<div class="sec">IMPORT LOG – lines read from each sheet (compare with your register)</div><div class="scroll"><table><tr><th class="l">Sheet</th><th>Unit</th><th>Direction</th><th>Lines read</th><th>Qty read</th><th class="l">Notes / skipped rows</th></tr>`+
+    R.log.map(l=>{const sk=l.skipped.map(s=>`row ${s[0]}: ${s[1]}`).join('; ');return `<tr><td class="l">${l.sheet}</td><td>${l.unit}</td><td>${l.dir}</td><td><b>${l.lines}</b></td><td>${num(l.qty)}</td><td class="l" style="${sk||/NOT read/.test(l.note)?'color:var(--red);font-weight:700':''}">${l.note} ${sk}</td></tr>`;}).join('')+
+    `<tr class="tot"><td class="l">TOTAL</td><td></td><td></td><td>${R.log.reduce((a,l)=>a+l.lines,0)}</td><td>${num(R.log.reduce((a,l)=>a+l.qty,0))}</td><td></td></tr></table></div>`+
+    (R.corrNotes.length?`<div class="sec">CORRECTIONS APPLIED</div>${R.corrNotes.map(t=>`<div class="obs">${t}</div>`).join('')}`:'')+
+    `<div class="sec">REGISTER LINES FLAGGED FOR REVIEW (${flagged.length} – all still counted)</div><div class="scroll"><table><tr><th class="l">Unit</th><th>Direction</th><th class="l">Machine</th><th>Row</th><th>Serial</th><th class="l">Note</th></tr>`+
+    flagged.map(x=>`<tr><td class="l">${x.unit}</td><td>${x.dir}</td><td class="l">${x.mc||''}</td><td>${x.src}</td><td>${x.sl??''}</td><td class="l">${x.flags.join(' ')}</td></tr>`).join('')+`</table></div>`;
+}
+$('prt').onclick=()=>{const p=document.querySelector('.tabpane:not(.hide)');document.querySelectorAll('.tabpane').forEach(x=>x.classList.remove('printing'));if(p)p.classList.add('printing');window.print();};
+$('xl').onclick=()=>{
+  const bytes=buildExcel(R),blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);const y=ymd(R.RM);a.download=`Machine_Bill_Report_${y.y}-${p2(y.m)}.xlsx`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);
+};
+try{if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js');}catch(e){}
+window.__test={loadRegister,readXlsx,compute,buildExcel,getR:()=>R,setReg:r=>{REG=r;},make};
+</script></body></html>
