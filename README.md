@@ -30,6 +30,9 @@ Sheet names like `Loan to AST`, `Loan from Well Lord`, `Loan to Appear`, `Loan T
 columns (out / returned). Dates may be real dates or text like `24.05.17`. Check **Checks & import log**
 every month: it shows lines read per sheet and lists any row that could not be read.
 
+## Logo
+The page shows a default logo. To use your own: open **Logo** on the page and upload a PNG/JPG (saved in that browser), **or** upload your picture to GitHub as `logo.png` next to `index.html` (shows for everyone, on top of the page and on every bill). For the installed-app icon replace the files in `icons/` (`icon-192.png`, `icon-512.png`, `icon-512-maskable.png`).
+
 ## Settings
 Rates per machine-day, holidays and date corrections are stored in the browser (localStorage) of the device used.
 
@@ -45,4 +48,5 @@ Rates per machine-day, holidays and date corrections are stored in the browser (
 |---|---|
 | `index.html` | The whole tool (no libraries, no internet needed) |
 | `manifest.webmanifest`, `sw.js`, `icons/` | Installable offline app (PWA) |
+| `logo.png` | Your logo (replace this file with your own picture) |
 | `.nojekyll` | Tells GitHub Pages to serve files as they are |
